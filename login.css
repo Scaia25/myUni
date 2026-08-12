@@ -1,0 +1,248 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+/* VARIABILI DESIGN SYSTEM */
+:root {
+  --bg: #edf0e8;
+  --card-bg: #ffffff;
+  --dark: #131416;
+  --lime: #d8fa3c;
+  --lime-hover: #cbef28;
+  --text: #131416;
+  --muted: #737780;
+  --border: #e2e5dc;
+
+  --radius: 22px;
+  --pill: 9999px;
+  --shadow: 0 10px 30px -10px rgba(19, 20, 22, 0.05);
+  --font: 'Plus Jakarta Sans', sans-serif;
+}
+
+/* RESET E BASE */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  line-height: 1.45;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+/* WRAPPER CENTRATO */
+.login-wrapper {
+  width: 100%;
+  max-width: 440px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* BRAND HEADER */
+.brand-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.brand-icon {
+  width: 44px;
+  height: 44px;
+  background: var(--dark);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--lime);
+  font-weight: 800;
+  font-size: 1.2rem;
+}
+
+.brand-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--dark);
+}
+
+/* CARD LOGIN */
+.card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 32px 28px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+}
+
+.card-header {
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.card-header h1 {
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--dark);
+  margin-bottom: 6px;
+}
+
+.card-header p {
+  font-size: 0.85rem;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+/* FORM & INPUTS */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+input[type="email"],
+input[type="password"] {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1.5px solid var(--border);
+  background: var(--bg);
+  font-family: inherit;
+  font-size: 0.95rem;
+  color: var(--text);
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+input[type="email"]:focus,
+input[type="password"]:focus {
+  border-color: var(--dark);
+  background: #ffffff;
+}
+
+.input-icon {
+  position: absolute;
+  right: 14px;
+  color: var(--muted);
+  cursor: pointer;
+  background: none;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+}
+
+.input-icon:hover {
+  color: var(--dark);
+}
+
+/* OPZIONI FORM */
+.form-options {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-top: -2px;
+}
+
+.remember-me {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  color: var(--text);
+}
+
+.remember-me input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--dark);
+  cursor: pointer;
+}
+
+.forgot-link {
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.forgot-link:hover {
+  color: var(--dark);
+  text-decoration: underline;
+}
+
+/* SUBMIT BUTTON */
+.btn-submit {
+  margin-top: 6px;
+  background: var(--lime);
+  color: var(--dark);
+  border: none;
+  padding: 14px;
+  border-radius: var(--pill);
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-submit:hover {
+  background: var(--lime-hover);
+}
+
+.btn-submit:active {
+  transform: scale(0.98);
+}
+
+/* FOOTER REGISTRAZIONE */
+.card-footer {
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.card-footer a {
+  color: var(--dark);
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.card-footer a:hover {
+  text-decoration: underline;
+}

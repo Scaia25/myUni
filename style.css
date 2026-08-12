@@ -228,11 +228,76 @@ body {
 /* GRAFICO */
 .chart-legend {
   display: flex;
+  flex-direction: column;
   gap: 12px;
   font-size: 0.8rem;
   font-weight: 600;
   flex-wrap: wrap;
 }
+
+.grafico {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.spaziatura {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.spaziatura span {
+  width: 10px;
+  flex-shrink: 0;
+}
+
+.barra-traccia {
+  width: 100%;
+  height: 10px;
+  background-color: #f1f5f9;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.barra {
+  height: 100%;
+  border-radius: 10px;
+  animation: caricaBarra 1s ease-out forwards;
+}
+
+@keyframes caricaBarra {
+  from {
+    width: 0%;
+  }
+}
+
+#barra-cibo {
+  width: 80%;
+  background-color: var(--cibo);
+}
+
+#barra-casa {
+  width: 30%;
+  background-color: var(--casa);
+}
+
+#barra-studio {
+  background-color: var(--studio);
+}
+
+#barra-trasporti {
+  background-color: var(--trasporti);
+}
+
+#barra-svago {
+  background-color: var(--svago);
+}
+
+#barra-extra {
+  background-color: var(--extra);
+}
+
 
 .legend-item {
   display: flex;
@@ -246,28 +311,37 @@ body {
   border-radius: 50%;
 }
 
+:root {
+  --cibo: #EA580C;
+  --casa: #0D9488;
+  --studio: #9333EA;
+  --trasporti: #0284C7;
+  --svago: #E11D48;
+  --extra: #1a2e05;
+}
+
 .dot-cibo {
-  background: #EA580C;
+  background: var(--cibo);
 }
 
 .dot-casa {
-  background: #0D9488;
+  background: var(--casa);
 }
 
 .dot-studio {
-  background: #9333EA;
+  background: var(--studio);
 }
 
 .dot-trasporti {
-  background: #0284C7;
+  background: var(--trasporti);
 }
 
 .dot-svago {
-  background: #E11D48;
+  background: var(--svago);
 }
 
 .dot-extra {
-  background: #D8FA3C;
+  background: var(--extra);
 }
 
 .chart-container {
@@ -362,42 +436,52 @@ select:focus {
 }
 
 /* TABELLA E TAGS */
-.table-wrap {
-  overflow-x: auto;
-  margin-top: 10px;
-}
 
 .table {
+  margin-top: 16px;
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.85rem;
-  table-layout: fixed;
 }
 
+#titoli-colonne {
+  border-bottom: 1.75px solid #9ea1a8;
+}
+
+#titoli-colonne th {
+  font-weight: 700 !important;
+  padding-bottom: 3px;
+}
+
+.table td,
 .table th {
-  text-align: left;
-  color: var(--muted);
-  padding-bottom: 8px;
+  font-size: 16px;
 }
 
-.table td {
-  padding: 10px 0;
-  border-top: 1px solid var(--border);
+.table .date {
+  max-width: 110;
+  text-align: left;
 }
 
 .table .amount {
-  text-align: right;
-  font-weight: 700;
-  font-size: 0.85rem;
+  text-align: center;
+  font-weight: normal;
 }
 
-/* Gestione testo tronco nella cella */
-.table .desc {
-  max-width: 118px;
+.table .category {
+  text-align: center;
+}
 
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.riga-spesa {
+  border-bottom: 1px black dashed;
+}
+
+.table tr.riga-spesa.no-border {
+  border-bottom: none !important;
+}
+
+.table .riga-spesa td {
+  padding-top: 10px;
+  padding-bottom: 10px;
 }
 
 .tag {
@@ -410,25 +494,35 @@ select:focus {
 
 .tag-cibo {
   background: #ffedd5;
-  color: #c2410c;
+  color: var(--cibo);
 }
 
 .tag-casa {
   background: #ccfbf1;
-  color: #0f766e;
+  color: var(--casa);
+}
+
+.tag-studio {
+  background: #f3e8ff;
+  color: var(--studio);
+}
+
+.tag-trasporti {
+  background: #e0f2fe;
+  color: var(--trasporti);
 }
 
 .tag-svago {
   background: #ffe4e6;
-  color: #be123c;
+  color: var(--svago);
+}
+
+.tag-extra {
+  background: #f7fee7;
+  color: var(--extra);
 }
 
 /* CHECKLIST WIDGET */
-.arrow {
-  color: var(--muted);
-  font-weight: 700;
-}
-
 .inline-form {
   display: flex;
   gap: 6px;
@@ -519,10 +613,5 @@ select:focus {
   .kpi-row,
   .subgrid {
     grid-template-columns: 1fr;
-  }
-
-  .table .date {
-    min-width: 100px;
-    padding-right: 50px;
   }
 }
