@@ -5,84 +5,73 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MyUniversity - Spesa Personale</title>
-    <meta name="description" content="Gestisci budget mensile, lista della spesa e cronologia acquisti." />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap"
-        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="style.css" />
 </head>
 
 <body>
-    <div class="dashboard-wrapper">
+    <div class="app">
 
-        <!-- SIDEBAR SCURA A CAPSULA -->
+        <!-- SIDEBAR -->
         <aside class="sidebar">
-            <nav class="sidebar__nav">
-                <a href="#riepilogo" class="nav-icon is-active" title="Dashboard">
+            <nav class="nav">
+                <a href="#riepilogo" class="nav-link active" title="Dashboard">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
                     </svg>
                 </a>
-                <a href="#cronologia" class="nav-icon" title="Statistiche & Lista">
+                <a href="#cronologia" class="nav-link" title="Statistiche">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="18" y1="20" x2="18" y2="10" />
                         <line x1="12" y1="20" x2="12" y2="4" />
                         <line x1="6" y1="20" x2="6" y2="14" />
                     </svg>
                 </a>
-                <a href="#lista" class="nav-icon" title="Checklist">
+                <a href="#lista" class="nav-link" title="Checklist">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M9 11l3 3L22 4" />
                         <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
                     </svg>
                 </a>
             </nav>
-            <div class="sidebar__footer">
-                <div class="avatar" title="Studente">
-                    <a href="#aggiungi">+ Aggiungi spesa </a>
-                </div>
+            <div class="sidebar-btn">
+                <a href="#aggiungi">+ Nuova spesa</a>
             </div>
         </aside>
 
-        <!-- CONTENUTO PRINCIPALE DALLO STILE DELLA FOTO -->
-        <main class="main-content">
+        <!-- CONTENUTO PRINCIPALE -->
+        <main class="main">
 
-            <!-- HEADER TOP BAR -->
-            <header class="top-header">
-                <div class="header-title">
-                    <h1>Gestione spese</h1>
-                </div>
+            <header class="header">
+                <h1>Gestione spese</h1>
             </header>
 
-            <!-- DASHBOARD GRID CENTRALE -->
-            <div class="dashboard-grid">
+            <div class="grid">
 
-                <!-- COLONNA SINISTRA/CENTRALE METRICHE E GRAFICO -->
-                <div class="grid-main">
+                <!-- COLONNA SINISTRA -->
+                <div class="col-main">
 
-                    <!-- CARDS TOP KPI -->
-                    <div class="kpi-cards-row">
+                    <!-- CARDS KPI -->
+                    <div class="kpi-row">
 
-                        <!-- Card 1: Speso Finora -->
-                        <div class="card-kpi card-kpi--white">
-                            <div class="card-kpi__header">
-                                <span class="card-kpi__title">Budget mensile rimanente</span>
-                                <span class="badge-pill badge-pill--lime" id="progress-percent-badge">42%</span>
+                        <div class="card kpi-white">
+                            <div class="kpi-header">
+                                <span class="kpi-title">Budget mensile rimanente (luglio)</span>
+                                <span class="badge badge-lime">50%</span>
                             </div>
-                            <div class="card-kpi__value-group">
-                                <span class="amount" id="spent-value">100,50 €</span>
-                                <span class="amount-sub">/ <span id="budget-value">200,00 €</span></span>
+                            <div class="kpi-values">
+                                <span class="amount">85,50 €</span>
+                                <span class="sub-amount">/ 200,00 €</span>
                             </div>
-                            <!-- Barra a segmenti stile capsula come nello screenshot -->
-                            <div class="capsule-segments" id="segments-spent">
-                                <span class="seg is-filled"></span>
-                                <span class="seg is-filled"></span>
-                                <span class="seg is-filled"></span>
-                                <span class="seg is-filled"></span>
-                                <span class="seg is-filled"></span>
-                                <span class="seg is-filled"></span>
+                            <div class="segments">
+                                <span class="seg filled"></span>
+                                <span class="seg filled"></span>
+                                <span class="seg filled"></span>
+                                <span class="seg filled"></span>
+                                <span class="seg filled"></span>
+                                <span class="seg filled"></span>
                                 <span class="seg"></span>
                                 <span class="seg"></span>
                                 <span class="seg"></span>
@@ -92,106 +81,93 @@
                             </div>
                         </div>
 
-                        <!-- Card 2: Rimanente (Sfondo Lime come nello screenshot) -->
-                        <div class="card-kpi card-kpi--lime">
-                            <div class="card-kpi__header">
-                                <span class="card-kpi__title">Soldi avanzati dai mesi precedenti</span>
+                        <div class="card kpi-lime">
+                            <div class="kpi-header">
+                                <span class="kpi-title">Avanzati dai mesi precedenti</span>
                             </div>
-                            <div class="card-kpi__value-group">
-                                <span class="amount" id="left-value">114,50 €</span>
+                            <div class="kpi-values">
+                                <span class="amount">114,50 €</span>
                             </div>
                         </div>
 
                     </div>
 
-                    <!-- GRAFICO / STATISTICHE STILE FOTO -->
-                    <div class="panel-card" id="riepilogo">
-                        <div class="panel-card__header">
+                    <!-- GRAFICO -->
+                    <div class="card" id="riepilogo">
+                        <div class="card-header">
                             <h2>Spese nel mese di luglio</h2>
                         </div>
 
                         <div class="chart-legend">
-                            <span class="legend-item"><span class="dot" id="dot_spesa_cibo"></span><span
-                                    class="legend-text">Spesa e cibo</span></span>
-                            <span class="legend-item"><span class="dot" id="dot_casa_utenze"></span><span
-                                    class="legend-text">Casa e utenze</span></span>
-                            <span class="legend-item"><span class="dot" id="dot_universita_studio"></span><span
-                                    class="legend-text">Università e studio</span></span>
-                            <span class="legend-item"><span class="dot" id="dot_trasporti"></span><span
-                                    class="legend-text">Trasporti e viaggi</span></span>
-                            <span class="legend-item"><span class="dot" id="dot_svago_personale"></span><span
-                                    class="legend-text">Svago e personale</span></span>
-                            <span class="legend-item"><span class="dot" id="dot_extra"></span><span
-                                    class="legend-text">Extra</span></span>
+                            <span class="legend-item"><span class="dot dot-cibo"></span>Spesa e cibo</span>
+                            <span class="legend-item"><span class="dot dot-casa"></span>Casa e utenze</span>
+                            <span class="legend-item"><span class="dot dot-studio"></span>Università e studio</span>
+                            <span class="legend-item"><span class="dot dot-trasporti"></span>Trasporti e viaggi</span>
+                            <span class="legend-item"><span class="dot dot-svago"></span>Svago e personale</span>
+                            <span class="legend-item"><span class="dot dot-extra"></span>Extra</span>
                         </div>
 
-                        <!-- Visualizzazione Grafico a Colonne Arrotondate con Indicatori -->
-                        <div class="bar-chart-container">
-                            <div class="bar-column">
-                                <div class="bar-pill-track">
-                                    <div class="bar-pill-dark" style="height: 75%;">
-                                        <div class="bar-pill-lime" style="height: 40%;"></div>
+                        <div class="chart-container">
+                            <div class="chart-col">
+                                <div class="chart-track">
+                                    <div class="bar-dark" style="height: 75%;">
+                                        <div class="bar-lime" style="height: 40%;"></div>
                                     </div>
                                 </div>
-                                <span class="bar-label">27 Jun</span>
+                                <span class="chart-label">27 Jun</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- GRID PER FORM SPESA & ULTIME SPESE -->
-                    <div class="subgrid-2">
+                    <!-- FORM SPESA + ULTIME SPESE -->
+                    <div class="subgrid">
 
-                        <!-- FORM AGGIUNGI SPESA -->
-                        <section id="aggiungi" class="panel-card">
+                        <section class="card" id="aggiungi">
                             <h2>Nuova spesa</h2>
-                            <form id="expense-form" class="custom-form" novalidate>
+                            <form id="expense-form" class="form">
                                 <div class="field">
                                     <label for="item-name">Descrizione Prodotto</label>
-                                    <input type="text" id="item-name" name="item_name"
-                                        placeholder="Es. Pasta, Supermercato..." required />
+                                    <input type="text" id="item-name" placeholder="Es. Supermercato..." required />
                                 </div>
-                                <div class="field-row">
-                                    <div class="field">
-                                        <label for="item-amount">Importo (€)</label>
-                                        <input type="number" id="item-amount" name="item_amount" step="0.01" min="0"
-                                            placeholder="0.00" required />
-                                    </div><!--
-                                    <div class="field">
-                                        <label for="item-date">Data</label>
-                                        <input type="date" id="item-date" name="item_date" />
-                                    </div>-->
+                                <div class="field">
+                                    <label for="item-amount">Importo (€)</label>
+                                    <input type="number" id="item-amount" step="0.01" min="0" placeholder="0.00" required />
                                 </div>
                                 <div class="field">
                                     <label for="item-category">Categoria</label>
-                                    <select id="item-category" name="item_category">
-                                        <option value="spesa_cibo">Spesa e cibo</option>
-                                        <option value="casa_utenze">Casa e utenze</option>
-                                        <option value="universita_studio">Università e studio</option>
+                                    <select id="item-category">
+                                        <option value="cibo">Spesa e cibo</option>
+                                        <option value="casa">Casa e utenze</option>
+                                        <option value="studio">Università e studio</option>
                                         <option value="trasporti">Trasporti e viaggi</option>
-                                        <option value="svago_personale">Svago e personale</option>
+                                        <option value="svago">Svago e personale</option>
                                         <option value="extra">Extra</option>
                                     </select>
                                 </div>
-                                <button class="btn-submit-pill" type="submit">Salva Spesa</button>
-                                <p class="form-msg" id="expense-msg" role="status"></p>
+                                <button class="btn-submit" type="submit">Salva Spesa</button>
+                                <p class="form-msg" id="expense-msg"></p>
                             </form>
                         </section>
 
-                        <!-- ULTIME SPESE TABELLA -->
-                        <section id="cronologia" class="panel-card">
-                            <h2>Ultime Registrazioni</h2>
+                        <section class="card" id="cronologia">
+                            <h2>Ultime spese</h2>
                             <div class="table-wrap">
-                                <table class="modern-table">
+                                <table class="table">
                                     <thead>
                                         <tr>
                                             <th>Data</th>
                                             <th>Descrizione</th>
                                             <th>Cat.</th>
-                                            <th class="right">Importo</th>
+                                            <th class="amount">Importo</th>
                                         </tr>
                                     </thead>
-                                    <tbody id="expense-rows">
-                                        <!-- Popolato via JS -->
+                                    <tbody>
+                                        <tr>
+                                            <td class="date">28/07/2026</td>
+                                            <td class="desc"><strong>Spesa Essssssselunga</strong></td>
+                                            <td><span class="tag tag-cibo">Cibo</span></td>
+                                            <td class="amount">1142,50 €</td>
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -201,25 +177,36 @@
 
                 </div>
 
-                <!-- COLONNA DESTRA / WIDGETS STILE FOTO -->
-                <aside class="grid-widgets">
-
-                    <!-- LISTA SPESA (CHECKLIST) -->
-                    <div class="panel-card widget-card" id="lista">
-                        <div class="widget-card__top">
+                <!-- COLONNA DESTRA -->
+                <aside class="col-side">
+                    <div class="card" id="lista">
+                        <div class="card-header">
                             <h3>Lista della spesa</h3>
-                            <span class="arrow-link">↗</span>
+                            <span class="arrow">↗</span>
                         </div>
-                        <form id="list-form" class="inline-form-pill">
+                        <form id="list-form" class="inline-form">
                             <input type="text" id="list-input" placeholder="Aggiungi articolo..." required />
-                            <button class="btn-add-circle" type="submit">+</button>
+                            <button class="btn-add" type="submit">+</button>
                         </form>
-                        <ul class="todo-list-modern" id="todo-list">
-                            <!-- Popolato da JS -->
+                        <ul class="todo-list" id="todo-list">
+                            <li>
+                                <input type="checkbox" id="todo-1">
+                                <label for="todo-1">Latte d'avena</label>
+                                <button class="btn-remove">&times;</button>
+                            </li>
+                            <li class="done">
+                                <input type="checkbox" id="todo-2" checked>
+                                <label for="todo-2">Pasta integrale</label>
+                                <button class="btn-remove">&times;</button>
+                            </li>
+                            <li>
+                                <input type="checkbox" id="todo-3">
+                                <label for="todo-3">Carta casa</label>
+                                <button class="btn-remove">&times;</button>
+                            </li>
                         </ul>
-                        <p class="todo__meta" id="todo-meta"></p>
+                        <p class="todo-meta" id="todo-meta">2 elementi ancora da acquistare.</p>
                     </div>
-
                 </aside>
 
             </div>
@@ -227,8 +214,7 @@
         </main>
 
     </div>
-
-    <script src="ssavecript.js" defer></script>
+    <script src="script.js" defer></script>
 </body>
 
 </html>
