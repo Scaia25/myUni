@@ -210,7 +210,7 @@ body {
 
 .segments {
   display: flex;
-  gap: 6px;
+  gap: 1px;
   margin-top: 10px;
 }
 
@@ -273,12 +273,10 @@ body {
 }
 
 #barra-cibo {
-  width: 80%;
   background-color: var(--cibo);
 }
 
 #barra-casa {
-  width: 30%;
   background-color: var(--casa);
 }
 
@@ -615,3 +613,4 @@ select:focus {
     grid-template-columns: 1fr;
   }
 }
+
