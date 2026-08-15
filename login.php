@@ -12,7 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] === "POST") {
   try {
     $email = $_POST['email'];
     $password = $_POST['password'];
-    if (!empty($email) && !empty($password)) {
+    if (isset($email) && isset($password)) {
       $query = "SELECT u.email, u.password FROM utenti u WHERE u.email = ?";
       $stmt = $conn->prepare($query);
       $stmt->bind_param("s", $email);

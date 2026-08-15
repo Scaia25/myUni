@@ -4,21 +4,35 @@ header("Content-Type: application/json");
 require_once('conn.php');
 
 if (!$_SESSION['isLogged']) {
-    header("Location: login.php");
+    echo json_encode([
+        'status' => 'error',
+        'message' => 'Utente non autenticato'
+    ]);
     exit();
 }
 
-$query = "SELECT * FROM categorie";
-$stmt = $conn->prepare($query);
-$stmt->execute();
-$result = $stmt->get_result();
+try {
+    $query = "SELECT * FROM categorie";
+    $stmt = $conn->prepare($query);
 
-$categorie = $result->fetch_all(MYSQLI_ASSOC);
+    if (!$stmt->execute()) {
+        throw new Exception("Errore connessione/scaricamento dati db");
+    }
+    $result = $stmt->get_result();
 
-echo json_encode([
-    'status' => 'success',
-    'data' => $categorie
-]);
+    $categorie = $result->fetch_all(MYSQLI_ASSOC);
+
+    echo json_encode([
+        'status' => 'success',
+        'data' => $categorie
+    ]);
+
+} catch (Exception $e) {
+    echo json_encode([
+        'status' => 'error',
+        'message' => $e->getMessage()
+    ]);
+}
 
 $conn->close();
 exit();

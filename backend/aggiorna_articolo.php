@@ -2,9 +2,8 @@
 session_start();
 header("Content-Type: application/json");
 require_once("conn.php");
-require_once("classes/spesa.php");
 
-if (!$_SESSION['isLogged']) {
+if (!isset($_SESSION['isLogged']) || !$_SESSION['isLogged']) {
     echo json_encode([
         'status' => 'error',
         'message' => 'Utente non autenticato'
@@ -12,26 +11,25 @@ if (!$_SESSION['isLogged']) {
     exit();
 }
 
-$email = $_SESSION['email'];
-
-$importo = $_POST['item-amount'];
-$descrizione = $_POST['item-name'];
-$categoria = $_POST['item-category'];
-
 try {
-    $spesa = new Spesa($email, $importo, $descrizione, $categoria);
+    if (!isset($_POST['checked']) || !isset($_POST['id'])) {
+        throw new Exception("Errore nel passaggio dati al server");
+    }
 
-    $importo = $spesa->getImporto();
+    $isChecked = (int) $_POST['checked'];
+    $ID_prodotto = (int) $_POST['id'];
 
-    $query = "INSERT INTO spese (email_utente, importo, descrizione, id_categoria) VALUES (?, ?, ?, ?)";
+    $query = "UPDATE articoli SET checked = ? WHERE ID = ?";
     $stmt = $conn->prepare($query);
-    $stmt->bind_param("sdss", $email, $importo, $descrizione, $categoria);
+    $stmt->bind_param("ii", $isChecked, $ID_prodotto);
+
     if (!$stmt->execute()) {
         throw new Exception("Errore connessione/caricamento dati db");
     }
+
     echo json_encode([
         'status' => 'success',
-        'message' => 'spesa aggiunta con successo!'
+        'message' => 'articolo aggiornato con successo!'
     ]);
 } catch (Exception $e) {
     echo json_encode([

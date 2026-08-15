@@ -3,14 +3,24 @@ function showModalError(errorMessage) {
   const overlay = document.createElement('div');
   overlay.className = 'modal-overlay';
 
+  const isAuthError = errorMessage === "Utente non autenticato";
+
+  let buttonHtml = "";
+
+  if (isAuthError) {
+    buttonHtml = `<button class="modal-btn" onclick="this.closest('.modal-overlay').remove(); window.location.href = 'index.php';">Riaccedi</button>`;
+  } else {
+    buttonHtml = `<button class="modal-btn" onclick="this.closest('.modal-overlay').remove();">Ho capito</button>`;
+  }
+
   overlay.innerHTML = `
-        <div class="modal-box">
-            <div class="modal-icon">!</div>
-            <h3>Attenzione</h3>
-            <p class="modal-text"></p>
-            <button class="modal-btn" onclick="this.closest('.modal-overlay').remove()">Ho capito</button>
-        </div>
-    `;
+  <div class="modal-box">
+    <div class="modal-icon">!</div>
+    <h3>Attenzione</h3>
+    <p class="modal-text"></p>
+    ${buttonHtml}
+  </div>
+`;
 
   overlay.querySelector('.modal-text').textContent = errorMessage;
   document.body.appendChild(overlay);
@@ -28,45 +38,79 @@ function aggiornaBordiTabella() {
   ultimaRiga.classList.add('no-border');
 }
 
+/* Aggiorna il testo del contatore della lista della spesa analizzando il DOM */
+function aggiornaContatoreTodo() {
+  const checkboxes = document.querySelectorAll('.todo-checkbox');
+  let articoliRimanenti = 0;
+
+  checkboxes.forEach(cb => {
+    if (!cb.checked) {
+      articoliRimanenti++;
+    }
+  });
+
+  const todo_meta = document.getElementById("todo-meta");
+  if (!todo_meta) return;
+
+  if (articoliRimanenti > 1) {
+    todo_meta.textContent = articoliRimanenti + " articoli ancora da acquistare";
+  } else if (articoliRimanenti === 1) {
+    todo_meta.textContent = articoliRimanenti + " articolo ancora da acquistare";
+  } else {
+    todo_meta.textContent = "Nessun articolo da acquistare";
+  }
+}
+
 /* Recupera i dati dal server e aggiorna l'interfaccia utente */
 async function caricaDashboard() {
   const header = document.querySelector(".header");
-  kpi_title = document.querySelector(".kpi-title");
-  budget_percentuale = document.querySelector(".badge.badge-lime");
-  budget_rimasto = document.getElementById("budget_rimasto");
-  budget_mensile = document.getElementById("budget_mensile");
-  segments = document.querySelector(".segments");
+  const kpi_title = document.querySelector(".kpi-title");
+  const budget_percentuale = document.querySelector(".badge.badge-lime");
+  const budget_rimasto = document.getElementById("budget_rimasto");
+  const budget_mensile = document.getElementById("budget_mensile");
+  const segments = document.querySelector(".segments");
   const card_header = document.querySelector(".card-header");
   const chart_legend = document.querySelector(".chart-legend");
   const contenitore = document.getElementById("tabella-spese");
+  const listaSpesa = document.getElementById("todo-list");
 
   const oggi = new Date();
   const meseCorrente = oggi.toLocaleDateString('it-IT', { month: 'long' });
 
-  kpi_title.textContent = "Budget mensile rimanente (" + meseCorrente + ")";
-  headerRiepilogoMensile = document.createElement("h2");
+  if (kpi_title) {
+    kpi_title.textContent = "Budget mensile rimanente (" + meseCorrente + ")";
+  }
 
   const euroFormatter = new Intl.NumberFormat("it-IT", { style: "currency", currency: "EUR" });
 
   try {
     // Richiesta dati utente e spese dal backend
-    const responseSpeseMensili = await fetch("backend/get_spese_mensili.php");
+    const [responseSpeseMensili, responseUtente, responseCategorie, responseArticoli] = await Promise.all([
+      fetch("backend/get_spese_mensili.php"),
+      fetch("backend/get_utente.php"),
+      fetch("backend/get_categorie.php"),
+      fetch("backend/get_articoli.php")
+    ]);
+
     const resultSpeseMensili = await responseSpeseMensili.json();
-
-    const responseUtente = await fetch("backend/get_utente.php");
     const resultUtente = await responseUtente.json();
-
-    const responseCategorie = await fetch("backend/get_categorie.php");
     const resultCategorie = await responseCategorie.json();
+    const resultArticoli = await responseArticoli.json();
 
-    if (resultUtente.status === "success" && resultSpeseMensili.status === "success") {
+    if (resultUtente.status === "success" && resultSpeseMensili.status === "success" && resultCategorie.status === "success" && resultArticoli.status === "success") {
       const utente = resultUtente.data;
 
-      nomeUtente = document.createElement("h1");
-      nomeUtente.textContent = "Gestione spese di " + utente.nome;
-      header.appendChild(nomeUtente);
+      // PULIZIA HEADER: rimuove H1 esistenti per evitare duplicazioni
+      if (header) {
+        header.querySelectorAll("h1").forEach(el => el.remove());
+        const nomeUtente = document.createElement("h1");
+        nomeUtente.textContent = "Gestione spese di " + utente.nome;
+        header.appendChild(nomeUtente);
+      }
 
-      budget_mensile.textContent = "/ " + euroFormatter.format(utente.budget_mensile);
+      if (budget_mensile) {
+        budget_mensile.textContent = "/ " + euroFormatter.format(utente.budget_mensile);
+      }
 
       // Calcolo totale spese e budget rimanente
       let spesaTotaleMensile = 0;
@@ -74,123 +118,172 @@ async function caricaDashboard() {
         spesaTotaleMensile += Number(spesa.importo);
       });
 
-      budget_rimasto_numerico = utente.budget_mensile - spesaTotaleMensile.toFixed(2);
-      budget_percentuale_numerica = Math.round(budget_rimasto_numerico / utente.budget_mensile * 1000) / 10;
-      budget_rimasto.textContent = euroFormatter.format(budget_rimasto_numerico);
-
-      // Aggiornamento indicatore grafico del budget
-      palliniPieni = Math.min(Math.max(Math.round(budget_percentuale_numerica / 5), 0), 20);
-      budget_percentuale.textContent = budget_percentuale_numerica + "%";
-      segments.innerHTML = "<span class='seg filled'></span>".repeat(palliniPieni) + "<span class='seg'></span>".repeat(20 - palliniPieni);
-
-      //aggiornamento grafico delle spese mensili diviso per categoria
-      headerRiepilogoMensile.innerHTML = "Spese nel mese di " + meseCorrente + "<br> (" + euroFormatter.format(spesaTotaleMensile) + ")";
-      card_header.appendChild(headerRiepilogoMensile);
-
-      resultCategorie.data.forEach(categoria => {
-
-        let spesaCategoria = 0;
-        resultSpeseMensili.data.forEach(spesa => {
-          if (spesa.id_categoria === categoria.ID)
-            spesaCategoria += spesa.importo;
-        }
-        )
-
-        divGrafico = document.createElement("div");
-        divGrafico.className = "grafico grafico-" + categoria.ID;
-
-        legend_item = document.createElement("span");
-        legend_item.className = "legend-item";
-
-        dot = document.createElement("span");
-        dot.className = "dot dot-" + categoria.ID;
-
-        legend_item.appendChild(dot);
-        legend_item.appendChild(document.createTextNode(categoria.denominazione + " (" + euroFormatter.format(spesaCategoria) + ")"));
-
-        spaziatura = document.createElement("div");
-        spaziatura.className = "spaziatura";
-
-        span = document.createElement("span");
-
-        barra_traccia = document.createElement("div");
-        barra_traccia.className = "barra-traccia";
-
-        barra = document.createElement("div");
-        barra.id = "barra-" + categoria.ID;
-        barra.className = "barra";
-
-        if (spesaCategoria > 0) {
-          percentualeBarra = (spesaCategoria / utente.budget_mensile) * 100
-          barra.style.width = percentualeBarra + "%";
-        } else {
-          barra.style.width = "1%";
-        }
-
-        barra_traccia.appendChild(barra);
-
-        spaziatura.appendChild(span);
-        spaziatura.appendChild(barra_traccia);
-
-        divGrafico.appendChild(legend_item);
-        divGrafico.appendChild(spaziatura);
-
-        chart_legend.appendChild(divGrafico);
-      });
-
-      // Popolamento della tabella con le ultime 5 spese
-      contenitore.innerHTML = '<tr id="titoli-colonne"><th class="date">Data</th><th class="amount">Importo</th><th class="category">Categoria</th></tr>';
-
-      let i = 0;
-      resultSpeseMensili.data.forEach(spesa => {
-        if (i >= 5) {
-          return;
-        }
-        const rigaSpesa = document.createElement("tr");
-        rigaSpesa.className = "riga-spesa";
-
-        const dataSpesa = document.createElement("td");
-        dataSpesa.className = "date";
-        const dataObj = new Date(spesa.data + "T00:00:00");
-        spesa.data = Intl.DateTimeFormat('it-IT').format(dataObj);
-        dataSpesa.textContent = spesa.data;
-
-        const importoSpesa = document.createElement("td");
-        importoSpesa.className = "amount";
-        spesa.importo = new Intl.NumberFormat("it-IT", { style: "currency", currency: "EUR" }).format(spesa.importo);
-        importoSpesa.textContent = spesa.importo;
-
-        const categoriaSpesa = document.createElement("td");
-        categoriaSpesa.className = "category";
-
-        const tagSpan = document.createElement("span");
-        tagSpan.className = "tag tag-" + spesa.id_categoria;
-        tagSpan.textContent = spesa.denominazione;
-
-        categoriaSpesa.appendChild(tagSpan);
-
-        rigaSpesa.appendChild(dataSpesa);
-        rigaSpesa.appendChild(importoSpesa);
-        rigaSpesa.appendChild(categoriaSpesa);
-
-        contenitore.appendChild(rigaSpesa);
-
-        i++;
-      });
-
-      if (resultSpeseMensili.data.length === 0) {
-        contenitore.textContent = "<p style='margin-top: 20px; text-align: center;'>Nessuna spesa registrata</p>";
+      const budget_rimasto_numerico = utente.budget_mensile - Number(spesaTotaleMensile.toFixed(2));
+      const budget_percentuale_numerica = Math.round(budget_rimasto_numerico / utente.budget_mensile * 1000) / 10;
+      
+      if (budget_rimasto) {
+        budget_rimasto.textContent = euroFormatter.format(budget_rimasto_numerico);
       }
 
-      aggiornaBordiTabella();
+      // Aggiornamento indicatore grafico del budget
+      const palliniPieni = Math.min(Math.max(Math.round(budget_percentuale_numerica / 5), 0), 20);
+      if (budget_percentuale) {
+        budget_percentuale.textContent = budget_percentuale_numerica + "%";
+      }
+      if (segments) {
+        segments.innerHTML = "<span class='seg filled'></span>".repeat(palliniPieni) + "<span class='seg'></span>".repeat(20 - palliniPieni);
+      }
+
+      // PULIZIA CARD HEADER: rimuove H2 esistenti prima di riappendere
+      if (card_header) {
+        card_header.querySelectorAll("h2").forEach(el => el.remove());
+        const headerRiepilogoMensile = document.createElement("h2");
+        headerRiepilogoMensile.innerHTML = "Spese nel mese di " + meseCorrente + "<br> (" + euroFormatter.format(spesaTotaleMensile) + ")";
+        card_header.appendChild(headerRiepilogoMensile);
+      }
+
+      // PULIZIA CHART LEGEND: svuota il contenitore prima del popolamento
+      if (chart_legend) {
+        chart_legend.replaceChildren();
+
+        resultCategorie.data.forEach(categoria => {
+          let spesaCategoria = 0;
+          resultSpeseMensili.data.forEach(spesa => {
+            if (spesa.id_categoria === categoria.ID)
+              spesaCategoria += Number(spesa.importo);
+          });
+
+          const divGrafico = document.createElement("div");
+          divGrafico.className = "grafico grafico-" + categoria.ID;
+
+          const legend_item = document.createElement("span");
+          legend_item.className = "legend-item";
+
+          const dot = document.createElement("span");
+          dot.className = "dot dot-" + categoria.ID;
+
+          legend_item.appendChild(dot);
+          legend_item.appendChild(document.createTextNode(categoria.denominazione + " (" + euroFormatter.format(spesaCategoria) + ")"));
+
+          const spaziatura = document.createElement("div");
+          spaziatura.className = "spaziatura";
+
+          const span = document.createElement("span");
+
+          const barra_traccia = document.createElement("div");
+          barra_traccia.className = "barra-traccia";
+
+          const barra = document.createElement("div");
+          barra.id = "barra-" + categoria.ID;
+          barra.className = "barra";
+
+          if (spesaCategoria > 0) {
+            const percentualeBarra = (spesaCategoria / utente.budget_mensile) * 100;
+            barra.style.width = percentualeBarra + "%";
+          } else {
+            barra.style.width = "1%";
+          }
+
+          barra_traccia.appendChild(barra);
+          spaziatura.appendChild(span);
+          spaziatura.appendChild(barra_traccia);
+
+          divGrafico.appendChild(legend_item);
+          divGrafico.appendChild(spaziatura);
+
+          chart_legend.appendChild(divGrafico);
+        });
+      }
+
+      // Popolamento della tabella con le ultime 5 spese
+      if (contenitore) {
+        contenitore.innerHTML = '<tr id="titoli-colonne"><th class="date">Data</th><th class="amount">Importo</th><th class="category">Categoria</th></tr>';
+
+        if (resultSpeseMensili.data.length === 0) {
+          contenitore.innerHTML += "<tr><td colspan='3' style='margin-top: 20px; text-align: center;'>Nessuna spesa registrata</td></tr>";
+        } else {
+          let i = 0;
+          resultSpeseMensili.data.forEach(spesa => {
+            if (i >= 5) return;
+
+            const rigaSpesa = document.createElement("tr");
+            rigaSpesa.className = "riga-spesa";
+
+            const dataSpesa = document.createElement("td");
+            dataSpesa.className = "date";
+            const dataObj = new Date(spesa.data + "T00:00:00");
+            dataSpesa.textContent = Intl.DateTimeFormat('it-IT').format(dataObj);
+
+            const importoSpesa = document.createElement("td");
+            importoSpesa.className = "amount";
+            importoSpesa.textContent = euroFormatter.format(spesa.importo);
+
+            const categoriaSpesa = document.createElement("td");
+            categoriaSpesa.className = "category";
+
+            const tagSpan = document.createElement("span");
+            tagSpan.className = "tag tag-" + spesa.id_categoria;
+            tagSpan.textContent = spesa.denominazione;
+
+            categoriaSpesa.appendChild(tagSpan);
+
+            rigaSpesa.appendChild(dataSpesa);
+            rigaSpesa.appendChild(importoSpesa);
+            rigaSpesa.appendChild(categoriaSpesa);
+
+            contenitore.appendChild(rigaSpesa);
+
+            i++;
+          });
+        }
+
+        aggiornaBordiTabella();
+      }
+
+      // Popolamento della lista della spesa
+      if (listaSpesa) {
+        listaSpesa.replaceChildren();
+
+        resultArticoli.data.forEach(articolo => {
+          const rigaListaSpesa = document.createElement("li");
+
+          const checkBoxArticolo = document.createElement("input");
+          checkBoxArticolo.type = "checkbox";
+          checkBoxArticolo.id = "todo-" + articolo.ID;
+          checkBoxArticolo.className = "todo-checkbox";
+          const isChecked = Number(articolo.checked) === 1;
+          checkBoxArticolo.checked = isChecked;
+
+          const descrizioneArticolo = document.createElement("label");
+          descrizioneArticolo.htmlFor = "todo-" + articolo.ID;
+          descrizioneArticolo.textContent = articolo.descrizione.charAt(0).toUpperCase() + articolo.descrizione.slice(1);
+
+          if (isChecked) {
+            descrizioneArticolo.style.textDecoration = "line-through";
+          }
+
+          const rimuoviArticolo = document.createElement("button");
+          rimuoviArticolo.className = "btn-remove";
+          rimuoviArticolo.innerHTML = "&times;";
+
+          rigaListaSpesa.appendChild(checkBoxArticolo);
+          rigaListaSpesa.appendChild(descrizioneArticolo);
+          rigaListaSpesa.appendChild(rimuoviArticolo);
+
+          listaSpesa.appendChild(rigaListaSpesa);
+        });
+
+        aggiornaContatoreTodo();
+      }
+
     }
   } catch (error) {
     console.error('Errore durante la fetch:', error);
   }
 }
 
-//Caricamento spesa nel db
-const formSpesa = document.getElementById("expense-form")
+// Caricamento spesa nel db
+const formSpesa = document.getElementById("expense-form");
 if (formSpesa) {
   formSpesa.addEventListener("submit", async function (e) {
     e.preventDefault();
@@ -207,7 +300,6 @@ if (formSpesa) {
 
       if (resultForm.status === "success") {
         this.reset();
-
         await caricaDashboard();
       } else {
         showModalError(resultForm.message);
@@ -219,6 +311,70 @@ if (formSpesa) {
   });
 }
 
+// Aggiorna articolo spuntato SENZA invocare caricaDashboard() completa
+document.addEventListener('change', async (event) => {
+  if (event.target && event.target.classList.contains('todo-checkbox')) {
+    const el = event.target;
+    const id = el.id.split("-")[1];
+    const isChecked = el.checked ? 1 : 0;
+
+    // Aggiornamento grafico locale e immediato del testo
+    const label = document.querySelector(`label[for="${el.id}"]`);
+    if (label) {
+      label.style.textDecoration = el.checked ? "line-through" : "none";
+    }
+
+    // Ricalcola il contatore in locale senza richieste di rete inutili
+    aggiornaContatoreTodo();
+
+    const formData = new FormData();
+    formData.append('id', id);
+    formData.append('checked', isChecked);
+
+    try {
+      const response = await fetch('backend/aggiorna_articolo.php', {
+        method: "POST",
+        body: formData
+      });
+      const result = await response.json();
+
+      if (result.status !== "success") {
+        showModalError(result.message || "Errore durante l'aggiornamento dell'articolo.");
+      }
+    } catch (error) {
+      showModalError("Errore durante l'invio dei dati: " + error);
+    }
+  }
+});
+
+// Aggiunta articoli alla lista della spesa 
+const formListaSpesa = document.getElementById("list-form");
+if (formListaSpesa) {
+  formListaSpesa.addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    const formData = new FormData(this);
+
+    try {
+      const responseForm = await fetch("backend/registra_articoli.php", {
+        method: "POST",
+        body: formData
+      });
+
+      const resultForm = await responseForm.json();
+
+      if (resultForm.status === "success") {
+        this.reset();
+        await caricaDashboard();
+      } else {
+        showModalError(resultForm.message);
+      }
+    } catch (error) {
+      console.error("Errore di connessione:", error);
+      showModalError("Impossibile connettersi al server!");
+    }
+  });
+}
 
 // Avvio iniziale
 caricaDashboard();

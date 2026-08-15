@@ -2,7 +2,6 @@
 session_start();
 header("Content-Type: application/json");
 require_once("conn.php");
-require_once("classes/spesa.php");
 
 if (!$_SESSION['isLogged']) {
     echo json_encode([
@@ -14,25 +13,21 @@ if (!$_SESSION['isLogged']) {
 
 $email = $_SESSION['email'];
 
-$importo = $_POST['item-amount'];
-$descrizione = $_POST['item-name'];
-$categoria = $_POST['item-category'];
-
 try {
-    $spesa = new Spesa($email, $importo, $descrizione, $categoria);
-
-    $importo = $spesa->getImporto();
-
-    $query = "INSERT INTO spese (email_utente, importo, descrizione, id_categoria) VALUES (?, ?, ?, ?)";
+    $query = "SELECT * FROM articoli p WHERE p.email_utente = ?";
     $stmt = $conn->prepare($query);
-    $stmt->bind_param("sdss", $email, $importo, $descrizione, $categoria);
+    $stmt->bind_param("s", $email);
     if (!$stmt->execute()) {
-        throw new Exception("Errore connessione/caricamento dati db");
+        throw new Exception("Errore connessione/scaricamento dati db");
     }
+    $result = $stmt->get_result();
+
+    $articoli = $result->fetch_all(MYSQLI_ASSOC);
     echo json_encode([
         'status' => 'success',
-        'message' => 'spesa aggiunta con successo!'
+        'data' => $articoli
     ]);
+
 } catch (Exception $e) {
     echo json_encode([
         'status' => 'error',

@@ -16,7 +16,7 @@ class Spesa
 
     private function setEmail_utente(string $email_utente): string
     {
-        if (!empty($email_utente) && filter_var($email_utente, FILTER_VALIDATE_EMAIL)) {
+        if (isset($email_utente) && filter_var($email_utente, FILTER_VALIDATE_EMAIL)) {
             return $email_utente;
         } else {
             throw new Exception("Email non valida!");

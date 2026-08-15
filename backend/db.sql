@@ -24,5 +24,15 @@ CREATE TABLE spese (
     importo decimal(6,2) not null,
     descrizione varchar(255),
     id_categoria varchar(255) not null,
-    data DATETIME DEFAULT CURRENT_TIMESTAMP
+    data DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (email_utente) REFERENCES utenti (email),
+    FOREIGN KEY (id_categoria) REFERENCES categorie (ID)
+);
+
+CREATE TABLE articoli (
+    ID int auto_increment primary key,
+    email_utente varchar(255) not null,
+    descrizione varchar(255) not null,
+    checked boolean default false,
+    FOREIGN KEY (email_utente) REFERENCES utenti (email)
 );

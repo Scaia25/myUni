@@ -16,7 +16,7 @@ class Utente
 
     private function setEmail(string $email): string
     {
-        if (!empty($email) && filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        if (isset($email) && filter_var($email, FILTER_VALIDATE_EMAIL)) {
             return $email;
         } else {
             throw new Exception("Email non valida!");
@@ -25,7 +25,7 @@ class Utente
 
     private function setNome(string $nome): string
     {
-        if (!empty($nome)) {
+        if (isset($nome)) {
             return $nome;
         } else {
             throw new Exception("Nome non valido!");
@@ -34,7 +34,7 @@ class Utente
 
     private function setCognome(string $cognome): string
     {
-        if (!empty($cognome)) {
+        if (isset($cognome)) {
             return $cognome;
         } else {
             throw new Exception("Cognome non valido!");
@@ -43,7 +43,7 @@ class Utente
 
     private function setPassword(string $password): string
     {
-        if (!empty($password)) {
+        if (isset($password)) {
             return password_hash($password, PASSWORD_DEFAULT);
         } else {
             throw new Exception("Password non valida!");

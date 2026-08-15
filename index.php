@@ -1,10 +1,10 @@
 <?php
 session_start();
+session_regenerate_id(true);
 require('backend/showServerErrors.php');
 require('backend/conn.php');
 require('backend/classes/utente.php');
 require('backend/classes/spesa.php');
-
 
 if (!$_SESSION['isLogged']) {
     header("Location: login.php");
@@ -17,13 +17,6 @@ $query = "SELECT * FROM categorie";
 $stmt = $conn->prepare($query);
 $stmt->execute();
 $categorie = $stmt->get_result();
-
-// Richiesta delle spese del mese corrente dell'utente
-$query = "SELECT *, sum(importo) FROM spese s WHERE s.email_utente = ? AND month(s.data) = month(curdate()) ORDER BY s.data DESC";
-$stmt = $conn->prepare($query);
-$stmt->bind_param("s", $email);
-$stmt->execute();
-$spese_menili = $stmt->get_result();
 ?>
 
 <!DOCTYPE html>
@@ -114,7 +107,7 @@ $spese_menili = $stmt->get_result();
                             <h2>Nuova spesa</h2>
                             <form id="expense-form" class="form" action="index.php" method="POST">
                                 <div class="field">
-                                    <label for="item-name">Descrizione Prodotto</label>
+                                    <label for="item-name">Descrizione spesa</label>
                                     <input type="text" name="item-name" id="item-name"
                                         placeholder="Es. Supermercato..." />
                                 </div>
@@ -164,27 +157,11 @@ $spese_menili = $stmt->get_result();
                             <h3>Lista della spesa</h3>
                         </div>
                         <form id="list-form" class="inline-form">
-                            <input type="text" id="list-input" placeholder="Aggiungi articolo..." required />
+                            <input type="text" id="list-input" name="prodotto" placeholder="Aggiungi articolo..." required />
                             <button class="btn-add" type="submit">+</button>
                         </form>
-                        <ul class="todo-list" id="todo-list">
-                            <li>
-                                <input type="checkbox" id="todo-1">
-                                <label for="todo-1">Latte d'avena</label>
-                                <button class="btn-remove">&times;</button>
-                            </li>
-                            <li class="done">
-                                <input type="checkbox" id="todo-2" checked>
-                                <label for="todo-2">Pasta integrale</label>
-                                <button class="btn-remove">&times;</button>
-                            </li>
-                            <li>
-                                <input type="checkbox" id="todo-3">
-                                <label for="todo-3">Carta casa</label>
-                                <button class="btn-remove">&times;</button>
-                            </li>
-                        </ul>
-                        <p class="todo-meta" id="todo-meta">2 elementi ancora da acquistare.</p>
+                        <ul class="todo-list" id="todo-list"></ul>
+                        <p class="todo-meta" id="todo-meta"></p>
                     </div>
                 </aside>
 

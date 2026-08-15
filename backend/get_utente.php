@@ -4,7 +4,10 @@ header("Content-Type: application/json");
 require_once('conn.php');
 
 if (!$_SESSION['isLogged']) {
-    header("Location: login.php");
+    echo json_encode([
+        'status' => 'error',
+        'message' => 'Utente non autenticato'
+    ]);
     exit();
 }
 
