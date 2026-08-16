@@ -156,7 +156,7 @@ body {
   color: #fff;
 }
 
-.sidebar-btn a {
+.sidebar-btn button {
   background: var(--lime);
   color: var(--dark);
   padding: 8px 12px;
@@ -164,6 +164,8 @@ body {
   font-weight: 700;
   font-size: 0.8rem;
   text-decoration: none;
+  border: 0px;
+  font-family: var(--font);
 }
 
 /* KPI CARDS */
@@ -222,8 +224,22 @@ body {
 }
 
 .seg.filled {
-  background: var(--dark);
+  animation: fillSegment 0.4s ease forwards;
+  animation-delay: calc(var(--i) * 30ms);
 }
+
+@keyframes fillSegment {
+  from {
+    background: #e8eae2;
+    transform: scaleY(0.6);
+  }
+
+  to {
+    background: var(--dark);
+    transform: scaleY(1);
+  }
+}
+
 
 /* GRAFICO */
 .chart-legend {
@@ -614,3 +630,61 @@ select:focus {
   }
 }
 
+/* Container della lista: deve essere una grid per animare l'altezza */
+#todo-list {
+  display: grid;
+  grid-template-rows: repeat(auto-fill, minmax(0, 1fr));
+  gap: 0;
+  /* Puoi aggiungere un gap se necessario */
+  transition: grid-template-rows 0.3s ease-in-out;
+}
+
+/* Stile di base per l'elemento li, con animazione di comparsa (slideIn) */
+#todo-list li {
+  display: flex;
+  /* O il layout che avevi prima */
+  align-items: center;
+
+  /* L'elemento parte invisibile e traslato */
+  opacity: 0;
+  transform: translateY(-10px);
+
+  /* Animazione di entrata */
+  animation: slideIn 0.3s ease-out forwards;
+
+  /* Prepariamo la transizione per la scomparsa */
+  transition: opacity 0.3s ease-out, transform 0.3s ease-out, margin 0.3s ease-out, padding 0.3s ease-out;
+
+  /* Assicuriamoci che non ci siano margini collassati o overflow */
+  overflow: hidden;
+  margin: 0;
+  padding: 10px;
+  /* Ripristina il padding che avevi */
+}
+
+/* Keyframes per l'animazione di entrata */
+@keyframes slideIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Classe speciale applicata da JS prima della rimozione */
+#todo-list li.removing {
+  /* Diventa trasparente e si sposta a destra */
+  opacity: 0 !important;
+  transform: translateX(30px) !important;
+
+  /* "Azzera" i margini e il padding per ridurre l'ingombro visivo */
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  height: 0 !important;
+  /* Forza l'altezza a 0 */
+  min-height: 0 !important;
+
+  /* Assicurati che l'animazione slideIn sia sovrascritta */
+  animation: none !important;
+}

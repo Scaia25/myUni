@@ -26,6 +26,18 @@ function showModalError(errorMessage) {
   document.body.appendChild(overlay);
 }
 
+// Scorrimento btn aggiungi spesa verso la section
+const aggiungiSpesaBtn = document.querySelector(".sidebar-btn");
+const aggiungiSpesaSection = document.getElementById("aggiungi");
+
+aggiungiSpesaBtn.addEventListener('click', () => {
+  aggiungiSpesaSection.scrollIntoView({
+    behavior: "smooth",
+    block: "center"
+  });
+});
+
+
 /* Gestisce la stilizzazione visiva dell'ultima riga di tabella */
 function aggiornaBordiTabella() {
   const righe = document.querySelectorAll('.table .riga-spesa');
@@ -61,26 +73,216 @@ function aggiornaContatoreTodo() {
   }
 }
 
-/* Recupera i dati dal server e aggiorna l'interfaccia utente */
-async function caricaDashboard() {
+/* Sottofunzioni di rendering per la Dashboard */
+
+function renderHeader(utente) {
   const header = document.querySelector(".header");
+  if (!header) return;
+
+  header.querySelectorAll("h1").forEach(el => el.remove());
+  const nomeUtente = document.createElement("h1");
+  nomeUtente.textContent = "Gestione spese di " + utente.nome;
+  header.appendChild(nomeUtente);
+}
+
+function renderKPIBudget(utente, spesaTotaleMensile, meseCorrente, euroFormatter) {
   const kpi_title = document.querySelector(".kpi-title");
   const budget_percentuale = document.querySelector(".badge.badge-lime");
   const budget_rimasto = document.getElementById("budget_rimasto");
   const budget_mensile = document.getElementById("budget_mensile");
   const segments = document.querySelector(".segments");
-  const card_header = document.querySelector(".card-header");
-  const chart_legend = document.querySelector(".chart-legend");
-  const contenitore = document.getElementById("tabella-spese");
-  const listaSpesa = document.getElementById("todo-list");
-
-  const oggi = new Date();
-  const meseCorrente = oggi.toLocaleDateString('it-IT', { month: 'long' });
 
   if (kpi_title) {
     kpi_title.textContent = "Budget mensile rimanente (" + meseCorrente + ")";
   }
 
+  if (budget_mensile) {
+    budget_mensile.textContent = "/ " + euroFormatter.format(utente.budget_mensile);
+  }
+
+  const budget_rimasto_numerico = utente.budget_mensile - Number(spesaTotaleMensile.toFixed(2));
+  const budget_percentuale_numerica = Math.round(budget_rimasto_numerico / utente.budget_mensile * 1000) / 10;
+
+  if (budget_rimasto) {
+    budget_rimasto.textContent = euroFormatter.format(budget_rimasto_numerico);
+  }
+
+  // Generazione dei 20 pallini del budget rimasto
+  segments.innerHTML = "<span class='seg'></span>".repeat(20);
+
+  const palliniPieni = Math.min(Math.max(Math.round(budget_percentuale_numerica / 5), 0), 20);
+  if (budget_percentuale) {
+    budget_percentuale.textContent = budget_percentuale_numerica + "%";
+  }
+  if (segments) {
+    const pallini = document.querySelectorAll('.segments > *');
+
+    setTimeout(() => {
+      pallini.forEach((pallino, index) => {
+        if (index < palliniPieni) {
+          // Passa l'indice al CSS per creare l'effetto progressivo ad onda
+          pallino.style.setProperty('--i', index);
+          pallino.classList.add("filled");
+        }
+      });
+    }, 50);
+  }
+}
+
+function renderGraficoCategorie(categorie, speseMensili, utente, spesaTotaleMensile, meseCorrente, euroFormatter) {
+  const card_header = document.querySelector(".card-header");
+  const chart_legend = document.querySelector(".chart-legend");
+
+  if (card_header) {
+    card_header.querySelectorAll("h2").forEach(el => el.remove());
+    const headerRiepilogoMensile = document.createElement("h2");
+    headerRiepilogoMensile.innerHTML = "Spese nel mese di " + meseCorrente + "<br> (" + euroFormatter.format(spesaTotaleMensile) + ")";
+    card_header.appendChild(headerRiepilogoMensile);
+  }
+
+  if (chart_legend) {
+    chart_legend.replaceChildren();
+
+    categorie.forEach(categoria => {
+      let spesaCategoria = 0;
+      speseMensili.forEach(spesa => {
+        if (spesa.id_categoria === categoria.ID)
+          spesaCategoria += Number(spesa.importo);
+      });
+
+      const divGrafico = document.createElement("div");
+      divGrafico.className = "grafico grafico-" + categoria.ID;
+
+      const legend_item = document.createElement("span");
+      legend_item.className = "legend-item";
+
+      const dot = document.createElement("span");
+      dot.className = "dot dot-" + categoria.ID;
+
+      legend_item.appendChild(dot);
+      legend_item.appendChild(document.createTextNode(categoria.denominazione + " (" + euroFormatter.format(spesaCategoria) + ")"));
+
+      const spaziatura = document.createElement("div");
+      spaziatura.className = "spaziatura";
+
+      const span = document.createElement("span");
+
+      const barra_traccia = document.createElement("div");
+      barra_traccia.className = "barra-traccia";
+
+      const barra = document.createElement("div");
+      barra.id = "barra-" + categoria.ID;
+      barra.className = "barra";
+
+      if (spesaCategoria > 0) {
+        const percentualeBarra = (spesaCategoria / utente.budget_mensile) * 100;
+        barra.style.width = percentualeBarra + "%";
+      } else {
+        barra.style.width = "1%";
+      }
+
+      barra_traccia.appendChild(barra);
+      spaziatura.appendChild(span);
+      spaziatura.appendChild(barra_traccia);
+
+      divGrafico.appendChild(legend_item);
+      divGrafico.appendChild(spaziatura);
+
+      chart_legend.appendChild(divGrafico);
+    });
+  }
+}
+
+function renderTabellaSpese(speseMensili, euroFormatter) {
+  const contenitore = document.getElementById("tabella-spese");
+  if (!contenitore) return;
+
+  contenitore.innerHTML = '<tr id="titoli-colonne"><th class="date">Data</th><th class="amount">Importo</th><th class="category">Categoria</th></tr>';
+
+  if (speseMensili.length === 0) {
+    contenitore.innerHTML += "<tr><td colspan='3' style='margin-top: 20px; text-align: center;'>Nessuna spesa registrata</td></tr>";
+  } else {
+    let i = 0;
+    speseMensili.forEach(spesa => {
+      if (i >= 5) return;
+
+      const rigaSpesa = document.createElement("tr");
+      rigaSpesa.className = "riga-spesa";
+
+      const dataSpesa = document.createElement("td");
+      dataSpesa.className = "date";
+      const dataObj = new Date(spesa.data + "T00:00:00");
+      dataSpesa.textContent = Intl.DateTimeFormat('it-IT').format(dataObj);
+
+      const importoSpesa = document.createElement("td");
+      importoSpesa.className = "amount";
+      importoSpesa.textContent = euroFormatter.format(spesa.importo);
+
+      const categoriaSpesa = document.createElement("td");
+      categoriaSpesa.className = "category";
+
+      const tagSpan = document.createElement("span");
+      tagSpan.className = "tag tag-" + spesa.id_categoria;
+      tagSpan.textContent = spesa.denominazione;
+
+      categoriaSpesa.appendChild(tagSpan);
+
+      rigaSpesa.appendChild(dataSpesa);
+      rigaSpesa.appendChild(importoSpesa);
+      rigaSpesa.appendChild(categoriaSpesa);
+
+      contenitore.appendChild(rigaSpesa);
+
+      i++;
+    });
+  }
+
+  aggiornaBordiTabella();
+}
+
+function renderListaSpesa(articoli) {
+  const listaSpesa = document.getElementById("todo-list");
+  if (!listaSpesa) return;
+
+  listaSpesa.replaceChildren();
+
+  articoli.forEach(articolo => {
+    const rigaListaSpesa = document.createElement("li");
+
+    const checkBoxArticolo = document.createElement("input");
+    checkBoxArticolo.type = "checkbox";
+    checkBoxArticolo.id = "todo-" + articolo.ID;
+    checkBoxArticolo.className = "todo-checkbox";
+    const isChecked = Number(articolo.checked) === 1;
+    checkBoxArticolo.checked = isChecked;
+
+    const descrizioneArticolo = document.createElement("label");
+    descrizioneArticolo.htmlFor = "todo-" + articolo.ID;
+    descrizioneArticolo.textContent = articolo.descrizione.charAt(0).toUpperCase() + articolo.descrizione.slice(1);
+
+    if (isChecked) {
+      descrizioneArticolo.style.textDecoration = "line-through";
+    }
+
+    const rimuoviArticolo = document.createElement("button");
+    rimuoviArticolo.className = "btn-remove";
+    rimuoviArticolo.id = "btn-remove-" + articolo.ID;
+    rimuoviArticolo.innerHTML = "&times;";
+
+    rigaListaSpesa.appendChild(checkBoxArticolo);
+    rigaListaSpesa.appendChild(descrizioneArticolo);
+    rigaListaSpesa.appendChild(rimuoviArticolo);
+
+    listaSpesa.appendChild(rigaListaSpesa);
+  });
+
+  aggiornaContatoreTodo();
+}
+
+/* Recupera i dati dal server e aggiorna l'interfaccia utente */
+async function caricaDashboard() {
+  const oggi = new Date();
+  const meseCorrente = oggi.toLocaleDateString('it-IT', { month: 'long' });
   const euroFormatter = new Intl.NumberFormat("it-IT", { style: "currency", currency: "EUR" });
 
   try {
@@ -99,183 +301,22 @@ async function caricaDashboard() {
 
     if (resultUtente.status === "success" && resultSpeseMensili.status === "success" && resultCategorie.status === "success" && resultArticoli.status === "success") {
       const utente = resultUtente.data;
+      const speseMensili = resultSpeseMensili.data;
+      const categorie = resultCategorie.data;
+      const articoli = resultArticoli.data;
 
-      // PULIZIA HEADER: rimuove H1 esistenti per evitare duplicazioni
-      if (header) {
-        header.querySelectorAll("h1").forEach(el => el.remove());
-        const nomeUtente = document.createElement("h1");
-        nomeUtente.textContent = "Gestione spese di " + utente.nome;
-        header.appendChild(nomeUtente);
-      }
-
-      if (budget_mensile) {
-        budget_mensile.textContent = "/ " + euroFormatter.format(utente.budget_mensile);
-      }
-
-      // Calcolo totale spese e budget rimanente
+      // Calcolo totale spese
       let spesaTotaleMensile = 0;
-      resultSpeseMensili.data.forEach(spesa => {
+      speseMensili.forEach(spesa => {
         spesaTotaleMensile += Number(spesa.importo);
       });
 
-      const budget_rimasto_numerico = utente.budget_mensile - Number(spesaTotaleMensile.toFixed(2));
-      const budget_percentuale_numerica = Math.round(budget_rimasto_numerico / utente.budget_mensile * 1000) / 10;
-      
-      if (budget_rimasto) {
-        budget_rimasto.textContent = euroFormatter.format(budget_rimasto_numerico);
-      }
-
-      // Aggiornamento indicatore grafico del budget
-      const palliniPieni = Math.min(Math.max(Math.round(budget_percentuale_numerica / 5), 0), 20);
-      if (budget_percentuale) {
-        budget_percentuale.textContent = budget_percentuale_numerica + "%";
-      }
-      if (segments) {
-        segments.innerHTML = "<span class='seg filled'></span>".repeat(palliniPieni) + "<span class='seg'></span>".repeat(20 - palliniPieni);
-      }
-
-      // PULIZIA CARD HEADER: rimuove H2 esistenti prima di riappendere
-      if (card_header) {
-        card_header.querySelectorAll("h2").forEach(el => el.remove());
-        const headerRiepilogoMensile = document.createElement("h2");
-        headerRiepilogoMensile.innerHTML = "Spese nel mese di " + meseCorrente + "<br> (" + euroFormatter.format(spesaTotaleMensile) + ")";
-        card_header.appendChild(headerRiepilogoMensile);
-      }
-
-      // PULIZIA CHART LEGEND: svuota il contenitore prima del popolamento
-      if (chart_legend) {
-        chart_legend.replaceChildren();
-
-        resultCategorie.data.forEach(categoria => {
-          let spesaCategoria = 0;
-          resultSpeseMensili.data.forEach(spesa => {
-            if (spesa.id_categoria === categoria.ID)
-              spesaCategoria += Number(spesa.importo);
-          });
-
-          const divGrafico = document.createElement("div");
-          divGrafico.className = "grafico grafico-" + categoria.ID;
-
-          const legend_item = document.createElement("span");
-          legend_item.className = "legend-item";
-
-          const dot = document.createElement("span");
-          dot.className = "dot dot-" + categoria.ID;
-
-          legend_item.appendChild(dot);
-          legend_item.appendChild(document.createTextNode(categoria.denominazione + " (" + euroFormatter.format(spesaCategoria) + ")"));
-
-          const spaziatura = document.createElement("div");
-          spaziatura.className = "spaziatura";
-
-          const span = document.createElement("span");
-
-          const barra_traccia = document.createElement("div");
-          barra_traccia.className = "barra-traccia";
-
-          const barra = document.createElement("div");
-          barra.id = "barra-" + categoria.ID;
-          barra.className = "barra";
-
-          if (spesaCategoria > 0) {
-            const percentualeBarra = (spesaCategoria / utente.budget_mensile) * 100;
-            barra.style.width = percentualeBarra + "%";
-          } else {
-            barra.style.width = "1%";
-          }
-
-          barra_traccia.appendChild(barra);
-          spaziatura.appendChild(span);
-          spaziatura.appendChild(barra_traccia);
-
-          divGrafico.appendChild(legend_item);
-          divGrafico.appendChild(spaziatura);
-
-          chart_legend.appendChild(divGrafico);
-        });
-      }
-
-      // Popolamento della tabella con le ultime 5 spese
-      if (contenitore) {
-        contenitore.innerHTML = '<tr id="titoli-colonne"><th class="date">Data</th><th class="amount">Importo</th><th class="category">Categoria</th></tr>';
-
-        if (resultSpeseMensili.data.length === 0) {
-          contenitore.innerHTML += "<tr><td colspan='3' style='margin-top: 20px; text-align: center;'>Nessuna spesa registrata</td></tr>";
-        } else {
-          let i = 0;
-          resultSpeseMensili.data.forEach(spesa => {
-            if (i >= 5) return;
-
-            const rigaSpesa = document.createElement("tr");
-            rigaSpesa.className = "riga-spesa";
-
-            const dataSpesa = document.createElement("td");
-            dataSpesa.className = "date";
-            const dataObj = new Date(spesa.data + "T00:00:00");
-            dataSpesa.textContent = Intl.DateTimeFormat('it-IT').format(dataObj);
-
-            const importoSpesa = document.createElement("td");
-            importoSpesa.className = "amount";
-            importoSpesa.textContent = euroFormatter.format(spesa.importo);
-
-            const categoriaSpesa = document.createElement("td");
-            categoriaSpesa.className = "category";
-
-            const tagSpan = document.createElement("span");
-            tagSpan.className = "tag tag-" + spesa.id_categoria;
-            tagSpan.textContent = spesa.denominazione;
-
-            categoriaSpesa.appendChild(tagSpan);
-
-            rigaSpesa.appendChild(dataSpesa);
-            rigaSpesa.appendChild(importoSpesa);
-            rigaSpesa.appendChild(categoriaSpesa);
-
-            contenitore.appendChild(rigaSpesa);
-
-            i++;
-          });
-        }
-
-        aggiornaBordiTabella();
-      }
-
-      // Popolamento della lista della spesa
-      if (listaSpesa) {
-        listaSpesa.replaceChildren();
-
-        resultArticoli.data.forEach(articolo => {
-          const rigaListaSpesa = document.createElement("li");
-
-          const checkBoxArticolo = document.createElement("input");
-          checkBoxArticolo.type = "checkbox";
-          checkBoxArticolo.id = "todo-" + articolo.ID;
-          checkBoxArticolo.className = "todo-checkbox";
-          const isChecked = Number(articolo.checked) === 1;
-          checkBoxArticolo.checked = isChecked;
-
-          const descrizioneArticolo = document.createElement("label");
-          descrizioneArticolo.htmlFor = "todo-" + articolo.ID;
-          descrizioneArticolo.textContent = articolo.descrizione.charAt(0).toUpperCase() + articolo.descrizione.slice(1);
-
-          if (isChecked) {
-            descrizioneArticolo.style.textDecoration = "line-through";
-          }
-
-          const rimuoviArticolo = document.createElement("button");
-          rimuoviArticolo.className = "btn-remove";
-          rimuoviArticolo.innerHTML = "&times;";
-
-          rigaListaSpesa.appendChild(checkBoxArticolo);
-          rigaListaSpesa.appendChild(descrizioneArticolo);
-          rigaListaSpesa.appendChild(rimuoviArticolo);
-
-          listaSpesa.appendChild(rigaListaSpesa);
-        });
-
-        aggiornaContatoreTodo();
-      }
-
+      // Esecuzione rendering componenti
+      renderHeader(utente);
+      renderKPIBudget(utente, spesaTotaleMensile, meseCorrente, euroFormatter);
+      renderGraficoCategorie(categorie, speseMensili, utente, spesaTotaleMensile, meseCorrente, euroFormatter);
+      renderTabellaSpese(speseMensili, euroFormatter);
+      renderListaSpesa(articoli);
     }
   } catch (error) {
     console.error('Errore durante la fetch:', error);
@@ -375,6 +416,45 @@ if (formListaSpesa) {
     }
   });
 }
+
+// Rimuvoi articolo elimanto SENZA invocare caricaDashboard() completa
+document.addEventListener('click', async (event) => {
+  if (event.target && event.target.classList.contains('btn-remove')) {
+    const el = event.target;
+    const id = el.id.split("-")[2];
+
+    const formData = new FormData();
+    formData.append('id', id);
+
+    try {
+      const response = await fetch('backend/rimuovi_articolo.php', {
+        method: "POST",
+        body: formData
+      });
+      const result = await response.json();
+
+      if (result.status === "success") {
+        const rigaDaRimuovere = el.closest("li");
+        if (rigaDaRimuovere) {
+          rigaDaRimuovere.classList.add("removing");
+
+          // Attende il completamento dell'animazione (300ms) prima di rimuovere dal DOM
+          setTimeout(() => {
+            rigaDaRimuovere.remove();
+            aggiornaContatoreTodo();
+          }, 300);
+        }
+      } else {
+        showModalError(result.message || "Errore durante l'aggiornamento dell'articolo.");
+      }
+
+      // Ricalcola il contatore e della in locale senza richieste di rete inutili
+      aggiornaContatoreTodo();
+    } catch (error) {
+      showModalError("Errore durante l'invio dei dati: " + error);
+    }
+  }
+});
 
 // Avvio iniziale
 caricaDashboard();

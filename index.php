@@ -60,7 +60,7 @@ $categorie = $stmt->get_result();
                 </a>
             </nav>
             <div class="sidebar-btn">
-                <a href="#aggiungi">+ Nuova spesa</a>
+                <button>+ Nuova spesa</button>
             </div>
         </aside>
 
@@ -157,7 +157,8 @@ $categorie = $stmt->get_result();
                             <h3>Lista della spesa</h3>
                         </div>
                         <form id="list-form" class="inline-form">
-                            <input type="text" id="list-input" name="prodotto" placeholder="Aggiungi articolo..." required />
+                            <input type="text" id="list-input" name="prodotto" placeholder="Aggiungi articolo..."
+                                required />
                             <button class="btn-add" type="submit">+</button>
                         </form>
                         <ul class="todo-list" id="todo-list"></ul>
@@ -170,7 +171,7 @@ $categorie = $stmt->get_result();
                         <span class="kpi-title">Avanzati dai mesi precedenti</span>
                     </div>
                     <div class="kpi-values">
-                        <span class="amount">114,50 €</span>
+                        <span class="amount">0,00 €</span>
                     </div>
                 </div>
             </div>
