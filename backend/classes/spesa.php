@@ -45,7 +45,11 @@ class Spesa
 
     private function setDescrizione(string $descrizione): string
     {
-        return $descrizione;
+        if (isset($descrizione) && !empty(trim($descrizione))) {
+            return $descrizione;
+        } else {
+            throw new Exception("Descrizione non valida!");
+        }
     }
 
     public function getImporto(): float

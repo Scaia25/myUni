@@ -1,7 +1,7 @@
 <?php
 session_start();
 header("Content-Type: application/json");
-require_once('conn.php');
+require_once('../conn.php');
 
 if (!$_SESSION['isLogged']) {
     echo json_encode([
@@ -13,7 +13,7 @@ if (!$_SESSION['isLogged']) {
 
 $email = $_SESSION['email'];
 
-$query = "SELECT nome, budget_mensile FROM utenti WHERE email = ?";
+$query = "SELECT * FROM utenti WHERE email = ?";
 $stmt = $conn->prepare($query);
 $stmt->bind_param("s", $email);
 $stmt->execute();

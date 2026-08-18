@@ -1,9 +1,9 @@
 <?php
 session_start();
 header("Content-Type: application/json");
-require_once("conn.php");
+require_once("../conn.php");
 
-if (!$_SESSION['isLogged']) {
+if (!isset($_SESSION['isLogged']) || !$_SESSION['isLogged']) {
     echo json_encode([
         'status' => 'error',
         'message' => 'Utente non autenticato'
@@ -11,23 +11,25 @@ if (!$_SESSION['isLogged']) {
     exit();
 }
 
-$email = $_SESSION['email'];
-
 try {
-    $query = "SELECT * FROM articoli p WHERE p.email_utente = ?";
-    $stmt = $conn->prepare($query);
-    $stmt->bind_param("s", $email);
-    if (!$stmt->execute()) {
-        throw new Exception("Errore connessione/scaricamento dati db");
+    if (!isset($_POST['id'])) {
+        throw new Exception("Errore nel passaggio dati al server");
     }
-    $result = $stmt->get_result();
 
-    $articoli = $result->fetch_all(MYSQLI_ASSOC);
+    $ID_prodotto = (int) $_POST['id'];
+
+    $query = "DELETE FROM articoli WHERE ID = ?";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("i", $ID_prodotto);
+
+    if (!$stmt->execute()) {
+        throw new Exception("Errore connessione/caricamento dati db");
+    }
+
     echo json_encode([
         'status' => 'success',
-        'data' => $articoli
+        'message' => 'articolo eliminato con successo!'
     ]);
-
 } catch (Exception $e) {
     echo json_encode([
         'status' => 'error',

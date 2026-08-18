@@ -193,6 +193,14 @@ function renderGraficoCategorie(categorie, speseMensili, utente, spesaTotaleMens
   }
 }
 
+function caricaCategorie(categorie) {
+  const contenitore = document.getElementById("item-category");
+  categorie.forEach(categoria => {
+    const option = new Option(categoria.denominazione, categoria.ID);
+    contenitore.add(option);
+  });
+}
+
 function renderTabellaSpese(speseMensili, euroFormatter) {
   const contenitore = document.getElementById("tabella-spese");
   if (!contenitore) return;
@@ -288,10 +296,10 @@ async function caricaDashboard() {
   try {
     // Richiesta dati utente e spese dal backend
     const [responseSpeseMensili, responseUtente, responseCategorie, responseArticoli] = await Promise.all([
-      fetch("backend/get_spese_mensili.php"),
-      fetch("backend/get_utente.php"),
-      fetch("backend/get_categorie.php"),
-      fetch("backend/get_articoli.php")
+      fetch("backend/api/get_spese_mensili.php"),
+      fetch("backend/api/get_utente.php"),
+      fetch("backend/api/get_categorie.php"),
+      fetch("backend/api/get_articoli.php")
     ]);
 
     const resultSpeseMensili = await responseSpeseMensili.json();
@@ -315,6 +323,7 @@ async function caricaDashboard() {
       renderHeader(utente);
       renderKPIBudget(utente, spesaTotaleMensile, meseCorrente, euroFormatter);
       renderGraficoCategorie(categorie, speseMensili, utente, spesaTotaleMensile, meseCorrente, euroFormatter);
+      caricaCategorie(categorie);
       renderTabellaSpese(speseMensili, euroFormatter);
       renderListaSpesa(articoli);
     }
@@ -332,7 +341,7 @@ if (formSpesa) {
     const formData = new FormData(this);
 
     try {
-      const responseForm = await fetch("backend/registra_spesa.php", {
+      const responseForm = await fetch("backend/api/registra_spesa.php", {
         method: "POST",
         body: formData
       });
@@ -373,7 +382,7 @@ document.addEventListener('change', async (event) => {
     formData.append('checked', isChecked);
 
     try {
-      const response = await fetch('backend/aggiorna_articolo.php', {
+      const response = await fetch('backend/api/aggiorna_articolo.php', {
         method: "POST",
         body: formData
       });
@@ -397,7 +406,7 @@ if (formListaSpesa) {
     const formData = new FormData(this);
 
     try {
-      const responseForm = await fetch("backend/registra_articoli.php", {
+      const responseForm = await fetch("backend/api/registra_articoli.php", {
         method: "POST",
         body: formData
       });
@@ -427,7 +436,7 @@ document.addEventListener('click', async (event) => {
     formData.append('id', id);
 
     try {
-      const response = await fetch('backend/rimuovi_articolo.php', {
+      const response = await fetch('backend/api/rimuovi_articolo.php', {
         method: "POST",
         body: formData
       });
@@ -457,4 +466,6 @@ document.addEventListener('click', async (event) => {
 });
 
 // Avvio iniziale
-caricaDashboard();
+document.addEventListener("DOMContentLoaded", () => {
+    caricaDashboard();
+});

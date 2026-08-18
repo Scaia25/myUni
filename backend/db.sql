@@ -26,7 +26,9 @@ CREATE TABLE spese (
     id_categoria varchar(255) not null,
     data DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (email_utente) REFERENCES utenti (email),
-    FOREIGN KEY (id_categoria) REFERENCES categorie (ID)
+    FOREIGN KEY (id_categoria) REFERENCES categorie (ID),
+    ON DELETE CASCADE
+    ON UPDATE CASCADE;
 );
 
 CREATE TABLE articoli (

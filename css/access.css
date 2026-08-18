@@ -61,7 +61,7 @@ body {
   border-radius: 50%;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: center;  
   color: var(--lime);
   font-weight: 800;
   font-size: 1.2rem;

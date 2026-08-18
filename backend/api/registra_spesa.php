@@ -1,8 +1,8 @@
 <?php
 session_start();
 header("Content-Type: application/json");
-require_once("conn.php");
-require_once("classes/spesa.php");
+require_once("../conn.php");
+require_once("../classes/spesa.php");
 
 if (!$_SESSION['isLogged']) {
     echo json_encode([
