@@ -4,7 +4,7 @@ header("Content-Type: application/json");
 require_once("../conn.php");
 require_once("../classes/spesa.php");
 
-if (!$_SESSION['isLogged']) {
+if (!isset($_SESSION['isLogged']) || !$_SESSION['isLogged']) {
     echo json_encode([
         'status' => 'error',
         'message' => 'Utente non autenticato'

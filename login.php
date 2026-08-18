@@ -3,7 +3,7 @@ session_start();
 require('backend/conn.php');
 require('backend/classes/utente.php');
 
-if ($_SESSION['isLogged']) {
+if (isset($_SESSION['isLogged']) && $_SESSION['isLogged']) {
   header("Location: index.php");
   exit();
 }

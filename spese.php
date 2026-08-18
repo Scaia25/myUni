@@ -2,7 +2,7 @@
 session_start();
 require('backend/conn.php');
 
-if (!$_SESSION['isLogged']) {
+if (!isset($_SESSION['isLogged']) || !$_SESSION['isLogged']) {
     header("Location: login.php");
     exit();
 }

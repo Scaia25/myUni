@@ -1,5 +1,5 @@
 <?php 
-$db_hostname = "127.0.0.1";
+$db_hostname = "db";
 $db_user = "root";
 $db_password = "";
 $db_name = "myuni";

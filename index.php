@@ -5,7 +5,7 @@ require('backend/conn.php');
 require('backend/classes/utente.php');
 require('backend/classes/spesa.php');
 
-if (!$_SESSION['isLogged']) {
+if (!isset($_SESSION['isLogged']) || !$_SESSION['isLogged']) {
     header("Location: login.php");
     exit();
 }
