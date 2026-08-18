@@ -27,7 +27,7 @@ class Spesa
     {
         $importo = str_replace(',', '.', trim((string) $importo));
 
-        if (is_numeric($importo)) {
+        if (is_numeric($importo) && $importo > 0) {
             return (float) $importo;
         } else {
             throw new Exception("Importo non valido!");

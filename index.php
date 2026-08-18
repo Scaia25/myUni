@@ -24,6 +24,7 @@ if (!isset($_SESSION['isLogged']) || !$_SESSION['isLogged']) {
         rel="stylesheet" />
     <link rel="stylesheet" href="css/index.css" />
     <link rel="stylesheet" href="css/modal-overlay.css" />
+    <link rel="icon" type="image/jpeg" href="images/favicon.jpeg">
 </head>
 
 <body>
@@ -31,13 +32,13 @@ if (!isset($_SESSION['isLogged']) || !$_SESSION['isLogged']) {
 
         <!-- SIDEBAR -->
         <aside class="sidebar">
-            <nav class="nav">
+           <nav class="nav">
                 <a class="nav-link active" title="Dashboard">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
                     </svg>
                 </a>
-                <a href="spese.php" class="nav-link" title="Statistiche">
+                <a href="spese.php" class="nav-link" title="Tutte le Spese">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="18" y1="20" x2="18" y2="10" />
                         <line x1="12" y1="20" x2="12" y2="4" />

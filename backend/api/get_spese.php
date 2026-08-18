@@ -13,7 +13,7 @@ if (!isset($_SESSION['isLogged']) || !$_SESSION['isLogged']) {
 
 $email = $_SESSION['email'];
 try {
-    $query = "SELECT date(s.data) as data, s.descrizione, s.importo, c.denominazione, s.id_categoria FROM spese s INNER JOIN categorie c ON c.ID = s.id_categoria WHERE s.email_utente = ? ORDER BY s.data DESC";
+    $query = "SELECT s.ID, date(s.data) as data, s.descrizione, s.importo, c.denominazione, s.id_categoria FROM spese s INNER JOIN categorie c ON c.ID = s.id_categoria WHERE s.email_utente = ? ORDER BY s.data DESC";
     $stmt = $conn->prepare($query);
     $stmt->bind_param("s", $email);
     if (!$stmt->execute()) {

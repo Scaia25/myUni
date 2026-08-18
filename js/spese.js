@@ -22,6 +22,18 @@ function showModalError(errorMessage) {
     document.body.appendChild(overlay);
 }
 
+/* Gestisce la stilizzazione visiva dell'ultima riga di tabella */
+function aggiornaBordiTabella() {
+    const righe = document.querySelectorAll('.table .riga-spesa');
+
+    righe.forEach(riga => riga.classList.remove('no-border'));
+
+    if (righe.length === 0) return;
+
+    const ultimaRiga = righe[righe.length - 1];
+    ultimaRiga.classList.add('no-border');
+}
+
 const oggi = new Date();
 const annoCorrente = oggi.getFullYear();
 const meseCorrente = oggi.getMonth() + 1;
@@ -148,7 +160,7 @@ function renderSpese(spese = speseData) {
                     </div>
                 </div>
             </div>
-            <button class="removeSpesaBtn" ${spesa.ID ? `id="removeSpesa-${spesa.ID}"` : ""}>&times;</button>
+            <button class="removeSpesaBtn" id="removeSpesa-${spesa.ID}">&times;</button>
         `;
 
         fragment.appendChild(rigaSpesa);
@@ -160,6 +172,8 @@ function renderSpese(spese = speseData) {
     if (spesaTotaleElem) {
         spesaTotaleElem.textContent = euroFormatter.format(spesaTotaleNumerica);
     }
+
+    aggiornaBordiTabella();
 }
 
 function escapeHTML(str) {
@@ -214,6 +228,41 @@ function disabilitaSelect() {
     }
 }
 
+async function eliminaSpesa(spesaId) {
+    const formData = new FormData();
+    formData.append("id", spesaId);
+
+    try {
+        const response = await fetch("backend/api/rimuovi_spesa.php", {
+            method: "POST",
+            body: formData
+        });
+        const result = await response.json();
+
+        if (result.status === "success") {
+            const rigaDaRimuovere = document.getElementById("riga-spesa-" + spesaId);
+            if (rigaDaRimuovere) {
+                // 1. Aspetta 200ms affinché il modale si chiuda completamente prima di iniziare l'animazione della riga
+                setTimeout(() => {
+                    rigaDaRimuovere.classList.add("removing");
+
+                    // 2. Aspetta che la riga completi la dissolvenza (300ms) prima di aggiornare i dati e il DOM
+                    setTimeout(() => {
+                        rigaDaRimuovere.remove();
+                        speseData = speseData.filter(s => Number(s.ID) !== Number(spesaId));
+                        aggiornaBordiTabella();
+                        renderSpese();
+                    }, 300);
+                }, 275);
+            }
+        } else {
+            showModalError(result.message || "Errore durante l'eliminazione della spesa.");
+        }
+    } catch (error) {
+        showModalError("Errore durante l'invio dei dati: " + error);
+    }
+}
+
 // 4. Inizializzazione Event Listeners all'interno del DOMContentLoaded
 document.addEventListener("DOMContentLoaded", () => {
     caricaDashboard();
@@ -226,7 +275,42 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (btnFilter) {
-        // Passa la funzione come callback (senza eseguire renderSpese())
         btnFilter.addEventListener("click", () => renderSpese());
+    }
+
+    const tabellaSpese = document.getElementById("tabella-spese");
+    const modalConferma = document.getElementById("modal-conferma");
+    const btnAnnulla = document.getElementById("btn-annulla-elimina");
+    const btnConferma = document.getElementById("btn-conferma-elimina");
+
+    let idSpesaDaEliminare = null;
+    if (tabellaSpese) {
+        tabellaSpese.addEventListener("click", (e) => {
+            const btn = e.target.closest(".removeSpesaBtn");
+            if (btn) {
+                idSpesaDaEliminare = btn.id.replace("removeSpesa-", "");
+
+                if (modalConferma) {
+                    modalConferma.classList.remove("hidden");
+                }
+            }
+        });
+    }
+
+    if (btnAnnulla && modalConferma) {
+        btnAnnulla.addEventListener("click", () => {
+            modalConferma.classList.add("hidden");
+            idSpesaDaEliminare = null;
+        });
+    }
+
+    if (btnConferma && modalConferma) {
+        btnConferma.addEventListener("click", () => {
+            if (idSpesaDaEliminare) {
+                modalConferma.classList.add("hidden");
+                eliminaSpesa(idSpesaDaEliminare);
+                idSpesaDaEliminare = null;
+            }
+        });
     }
 });

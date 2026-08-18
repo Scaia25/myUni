@@ -1,3 +1,15 @@
+<?php
+session_start();
+require('backend/conn.php');
+
+if (!isset($_SESSION['isLogged']) || !$_SESSION['isLogged']) {
+    header("Location: login.php");
+    exit();
+}
+
+$email = $_SESSION['email'];
+?>
+
 <!DOCTYPE html>
 <html lang="it">
 
@@ -10,6 +22,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
         rel="stylesheet" />
     <link rel="stylesheet" href="css/settings.css" />
+    <link rel="icon" type="image/jpeg" href="images/favicon.jpeg">
 </head>
 
 <body>
@@ -84,8 +97,7 @@
                     <form id="budget-form" class="form settings-form">
                         <div class="field">
                             <label for="monthly-budget">Budget Mensile (€)</label>
-                            <input type="text" id="monthly-budget" name="monthly_budget" inputmode="decimal"
-                                required />
+                            <input type="text" id="monthly-budget" name="monthly_budget" inputmode="decimal" required />
                         </div>
                         <button type="submit" class="btn-submit">Aggiorna Budget</button>
                     </form>

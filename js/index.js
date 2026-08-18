@@ -195,6 +195,9 @@ function renderGraficoCategorie(categorie, speseMensili, utente, spesaTotaleMens
 
 function caricaCategorie(categorie) {
   const contenitore = document.getElementById("item-category");
+  if (contenitore.options.length > 0) return;
+
+  contenitore.replaceChildren();
   categorie.forEach(categoria => {
     const option = new Option(categoria.denominazione, categoria.ID);
     contenitore.add(option);
@@ -454,7 +457,7 @@ document.addEventListener('click', async (event) => {
           }, 300);
         }
       } else {
-        showModalError(result.message || "Errore durante l'aggiornamento dell'articolo.");
+        showModalError(result.message || "Errore durante l'eliminazione dell'articolo.");
       }
 
       // Ricalcola il contatore e della in locale senza richieste di rete inutili
@@ -467,5 +470,5 @@ document.addEventListener('click', async (event) => {
 
 // Avvio iniziale
 document.addEventListener("DOMContentLoaded", () => {
-    caricaDashboard();
+  caricaDashboard();
 });
