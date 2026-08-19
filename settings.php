@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once 'backend/config.php';
 require('backend/conn.php');
 
 if (!isset($_SESSION['isLogged']) || !$_SESSION['isLogged']) {
@@ -101,6 +101,23 @@ $email = $_SESSION['email'];
                         </div>
                         <button type="submit" class="btn-submit">Aggiorna Budget</button>
                     </form>
+                </section>
+
+                <!-- PERSONALIZZAZIONE TEMA -->
+                <section class="card settings-card">
+                    <div class="settings-card-header">
+                        <h2>Tema dell'App</h2>
+                        <p>Scegli la tonalità principale dell'interfaccia</p>
+                    </div>
+
+                    <div class="theme-selector" id="theme-selector">
+                        <button type="button" class="theme-dot active" style="--color: #D8FA3C;">
+                            <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                        </button>
+                    </div>
                 </section>
 
                 <!-- SICUREZZA -->

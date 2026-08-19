@@ -6,7 +6,6 @@
   --card-bg: #ffffff;
   --dark: #131416;
   --lime: #d8fa3c;
-  --lime-hover: #cbef28;
   --text: #131416;
   --muted: #737780;
   --border: #e2e5dc;
@@ -97,7 +96,8 @@ body {
   inset: 0;
   background: #2b2e36;
   border-radius: 50%;
-  transform: scale(0); /* Di base è chiuso al centro */
+  transform: scale(0);
+  /* Di base è chiuso al centro */
   transform-origin: center;
   z-index: -1;
 }
@@ -116,6 +116,7 @@ body {
   from {
     transform: scale(0);
   }
+
   to {
     transform: scale(1);
   }
@@ -123,7 +124,7 @@ body {
 
 
 .sidebar-btn button {
-  background: var(--lime);
+  background: var(--user-theme);
   color: var(--dark);
   padding: 8px 12px;
   border-radius: var(--pill);
@@ -190,7 +191,7 @@ select:focus {
 
 .btn-submit {
   margin-top: 8px;
-  background: var(--lime);
+  background: var(--user-theme);
   color: var(--dark);
   border: none;
   padding: 12px;
@@ -319,7 +320,7 @@ select:focus {
 
 .toggle-switch input:checked+.toggle-slider:before {
   transform: translateX(20px);
-  background-color: var(--lime);
+  background-color: var(--user-theme);
 }
 
 /* Bottoni Secondari */
@@ -569,12 +570,8 @@ select:focus {
 }
 
 .btn-primary {
-  background-color: var(--lime);
+  background-color: var(--user-theme);
   color: var(--dark);
-}
-
-.btn-primary:hover {
-  background-color: var(--lime-hover);
 }
 
 .btn-danger {
@@ -610,4 +607,86 @@ select:focus {
   .nav {
     flex-direction: row;
   }
+}
+
+/* ==========================================================================
+   SELETTORE TEMA BOLLI (MODERNO & INTERATTIVO)
+   ========================================================================== */
+.theme-selector {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 8px 0;
+}
+
+.theme-dot {
+  position: relative;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  background-color: var(--color);
+
+  /* Layout per centrare l'icona spunta */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* Sfumatura sottile per dare profondità e ombra morbida */
+  box-shadow:
+    inset 0 2px 4px rgba(255, 255, 255, 0.4),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.15),
+    0 4px 10px -2px rgba(19, 20, 22, 0.12);
+
+  transition:
+    transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.25s ease;
+}
+
+/* Hover: ingrandimento elastico ed elevazione ombra */
+.theme-dot:hover {
+  transform: translateY(-2px) scale(1.1);
+  box-shadow:
+    inset 0 2px 4px rgba(255, 255, 255, 0.5),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.15),
+    0 8px 16px -4px rgba(19, 20, 22, 0.2);
+}
+
+/* Pressione del bottone (Active click) */
+.theme-dot:active {
+  transform: scale(0.95);
+}
+
+/* Icona Spunta (di base invisibile) */
+.theme-dot .check-icon {
+  width: 16px;
+  height: 16px;
+  color: #131416;
+  /* Testo/Icona scura */
+  opacity: 0;
+  transform: scale(0.4) rotate(-20deg);
+  transition:
+    opacity 0.2s ease,
+    transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  pointer-events: none;
+}
+
+/* Stato Attivo / Selezionato */
+.theme-dot.active {
+  transform: scale(1.08);
+  box-shadow:
+    inset 0 2px 4px rgba(255, 255, 255, 0.5),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.15),
+    0 0 0 3px var(--card-bg),
+    0 0 0 5px #131416,
+    0 10px 20px -5px rgba(19, 20, 22, 0.25);
+}
+
+/* Animazione comparsa della spunta */
+.theme-dot.active .check-icon {
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
 }

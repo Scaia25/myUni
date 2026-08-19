@@ -1,7 +1,8 @@
 <?php
-session_start();
+require_once 'backend/config.php';
 require('backend/conn.php');
 require('backend/classes/utente.php');
+
 
 if (isset($_SESSION['isLogged']) && $_SESSION['isLogged']) {
   header("Location: index.php");
@@ -22,6 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === "POST") {
       if ($res->num_rows == 1) {
         $row = $res->fetch_assoc();
         if (password_verify($password, $row['password'])) {
+          session_regenerate_id(true);
           $_SESSION['isLogged'] = true;
           $_SESSION['email'] = $email;
           header("Location: index.php");

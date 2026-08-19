@@ -290,6 +290,28 @@ function renderListaSpesa(articoli) {
   aggiornaContatoreTodo();
 }
 
+// render del tema d'interfaccia
+function renderTemi(utente, temi) {
+    const listaTemi = Array.isArray(temi) ? temi : (temi?.data || []);
+    const idTemaUtente = Array.isArray(utente) ? utente[0]?.id_tema : utente?.id_tema;
+
+    const temaAttivo = listaTemi.find(tema => 
+        String(tema.id_tema ?? tema.ID ?? tema.id ?? tema.idTema) === String(idTemaUtente)
+    );
+
+    if (temaAttivo) {
+        caricaTema(temaAttivo.colore);
+    }
+}
+
+// Caricare il tema sull'intera interfaccia
+function caricaTema(coloreTema) {
+  if (coloreTema) {
+    const hex = coloreTema.replace("#", "");
+    document.documentElement.style.setProperty("--user-theme", "#" + hex);
+  }
+}
+
 /* Recupera i dati dal server e aggiorna l'interfaccia utente */
 async function caricaDashboard() {
   const oggi = new Date();
@@ -298,23 +320,27 @@ async function caricaDashboard() {
 
   try {
     // Richiesta dati utente e spese dal backend
-    const [responseSpeseMensili, responseUtente, responseCategorie, responseArticoli] = await Promise.all([
+    const [responseSpeseMensili, responseUtente, responseCategorie, responseArticoli, responseTemi] = await Promise.all([
       fetch("backend/api/get_spese_mensili.php"),
       fetch("backend/api/get_utente.php"),
       fetch("backend/api/get_categorie.php"),
-      fetch("backend/api/get_articoli.php")
+      fetch("backend/api/get_articoli.php"),
+      fetch("/backend/api/get_temi.php")
     ]);
 
     const resultSpeseMensili = await responseSpeseMensili.json();
     const resultUtente = await responseUtente.json();
     const resultCategorie = await responseCategorie.json();
     const resultArticoli = await responseArticoli.json();
+    const resultTemi = await responseTemi.json();
 
-    if (resultUtente.status === "success" && resultSpeseMensili.status === "success" && resultCategorie.status === "success" && resultArticoli.status === "success") {
+    if (resultUtente.status === "success" && resultSpeseMensili.status === "success" && resultCategorie.status === "success" && resultArticoli.status === "success" && resultTemi.status === "success") {
       const utente = resultUtente.data;
       const speseMensili = resultSpeseMensili.data;
       const categorie = resultCategorie.data;
       const articoli = resultArticoli.data;
+      const temi = resultTemi.data;
+
 
       // Calcolo totale spese
       let spesaTotaleMensile = 0;
@@ -329,6 +355,7 @@ async function caricaDashboard() {
       caricaCategorie(categorie);
       renderTabellaSpese(speseMensili, euroFormatter);
       renderListaSpesa(articoli);
+      renderTemi(utente, temi);
     }
   } catch (error) {
     console.error('Errore durante la fetch:', error);

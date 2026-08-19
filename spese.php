@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once 'backend/config.php';
 require('backend/conn.php');
 
 if (!isset($_SESSION['isLogged']) || !$_SESSION['isLogged']) {

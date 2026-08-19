@@ -1,7 +1,7 @@
 // Mostra la modale di errore/avviso dinamica
 function showModalError(errorMessage) {
     const overlay = document.createElement('div');
-    overlay.className = 'modal-overlay active'; // AGGIUNTO: classe 'active' per mostrare l'overlay CSS
+    overlay.className = 'modal-overlay active';
 
     const isAuthError = errorMessage === "Utente non autenticato";
 
@@ -49,7 +49,7 @@ function showModalSuccess(successMessage) {
     document.body.appendChild(overlay);
 }
 
-//funzione ucfirst per js ed euroformatter
+// Funzione ucfirst per js ed euroformatter
 function ucfirst(str) {
     if (!str) return '';
     return str.charAt(0).toUpperCase() + str.slice(1);
@@ -58,17 +58,21 @@ function ucfirst(str) {
 const euroFormatter = new Intl.NumberFormat("it-IT", { style: "currency", currency: "EUR" });
 
 
-//funzione per caricare l'intera dashboard 
+// Funzione per caricare l'intera dashboard 
 async function caricaDashboard() {
     try {
         const responseUtente = await fetch("backend/api/get_utente.php");
         const resultUtente = await responseUtente.json();
 
-        if (resultUtente.status === "success") {
+        const responseTemi = await fetch("backend/api/get_temi.php");
+        const resultTemi = await responseTemi.json();
+
+        if (resultUtente.status === "success" && resultTemi.status === "success") {
             renderAnagrafica(resultUtente.data);
             renderBudget(resultUtente.data);
+            renderTemi(resultUtente.data, resultTemi.data);
         } else {
-            const errorMsg = resultSpese.message || resultCategorie.message || "Errore nel caricamento dei dati.";
+            const errorMsg = resultUtente.message || resultTemi.message || "Errore nel caricamento dei dati.";
             showModalError(errorMsg);
         }
 
@@ -78,25 +82,80 @@ async function caricaDashboard() {
     }
 }
 
-//render anagrafica utente
+// Caricare il tema sull'intera interfaccia
+function caricaTema(coloreTema) {
+    if (coloreTema) {
+        const hex = coloreTema.replace("#", "");
+        document.documentElement.style.setProperty("--user-theme", "#" + hex);
+    }
+}
+
+// Render anagrafica utente
 function renderAnagrafica(utente) {
+    if (!utente) return;
     const nome = document.getElementById("name");
     const cognome = document.getElementById("surname");
     const email = document.getElementById("email");
-
-    nome.value = ucfirst(utente.nome);
-    cognome.value = ucfirst(utente.cognome);
-    email.value = utente.email;
+    if (nome) nome.value = ucfirst(utente.nome || "");
+    if (cognome) cognome.value = ucfirst(utente.cognome || "");
+    if (email) email.value = utente.email || "";
 }
 
-//render budget mensile
+// Render budget mensile
 function renderBudget(utente) {
     const budget = document.getElementById("monthly-budget");
-
-    budget.value = utente.budget_mensile.replace(".", ",");
+    if (!budget || !utente || !utente.budget_mensile) return;
+    budget.value = utente.budget_mensile.toString().replace(".", ",");
 }
 
-//funzione per aggiornare anagrafica utente
+// Render tema e selettore temi
+function renderTemi(utente, temi) {
+    const selettoreTemi = document.getElementById("theme-selector");
+
+    if (!selettoreTemi) {
+        console.error("Contenitore #theme-selector non trovato");
+        return;
+    }
+
+    const listaTemi = Array.isArray(temi) ? temi : (temi?.data || []);
+
+    if (listaTemi.length === 0) {
+        console.warn("Nessun tema trovato nell'array:", temi);
+        return;
+    }
+
+    selettoreTemi.innerHTML = "";
+
+    const idTemaUtente = Array.isArray(utente) ? utente[0]?.id_tema : utente?.id_tema;
+
+    listaTemi.forEach(tema => {
+        const btnTheme = document.createElement("button");
+        btnTheme.type = "button";
+        btnTheme.className = "theme-dot";
+
+        const idAttuale = tema.id_tema ?? tema.ID ?? tema.id ?? tema.idTema;
+
+        btnTheme.id = "theme-" + idAttuale;
+        btnTheme.setAttribute("data-id", idAttuale);
+        btnTheme.setAttribute("data-color", tema.colore);
+        btnTheme.style.setProperty("--color", "#" + tema.colore);
+
+        if (String(idTemaUtente) === String(idAttuale)) {
+            btnTheme.classList.add("active");
+            caricaTema(tema.colore);
+        }
+
+        btnTheme.innerHTML = `
+            <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+        `;
+
+        selettoreTemi.appendChild(btnTheme);
+    });
+}
+
+// Funzione per aggiornare anagrafica utente
 async function aggiornaAnagrafica(formAnagrafica) {
     const formData = new FormData(formAnagrafica);
 
@@ -109,7 +168,6 @@ async function aggiornaAnagrafica(formAnagrafica) {
         const resultForm = await responseForm.json();
 
         if (resultForm.status === "success") {
-            // Messaggio di conferma in caso di successo
             showModalSuccess(resultForm.message || "Anagrafica aggiornata con successo!");
         } else {
             showModalError(resultForm.message);
@@ -120,8 +178,7 @@ async function aggiornaAnagrafica(formAnagrafica) {
     }
 }
 
-
-//funzione per aggiornare budget mensile utente
+// Funzione per aggiornare budget mensile utente
 async function aggiornaBudget(formBudget) {
     const formData = new FormData(formBudget);
 
@@ -134,7 +191,6 @@ async function aggiornaBudget(formBudget) {
         const resultForm = await responseForm.json();
 
         if (resultForm.status === "success") {
-            // Messaggio di conferma in caso di successo
             showModalSuccess(resultForm.message || "Budget aggiornato con successo!");
         } else {
             showModalError(resultForm.message);
@@ -145,8 +201,7 @@ async function aggiornaBudget(formBudget) {
     }
 }
 
-
-//funzione per aggiornare la password utente
+// Funzione per aggiornare la password utente
 async function aggiornaPassword(formPassword) {
     const formData = new FormData(formPassword);
 
@@ -161,7 +216,6 @@ async function aggiornaPassword(formPassword) {
         if (resultForm.status === "success") {
             closeModal("modal-password");
             formPassword.reset();
-            // Messaggio di conferma in caso di successo
             showModalSuccess(resultForm.message || "Password aggiornata con successo!");
         } else {
             closeModal("modal-password");
@@ -176,7 +230,7 @@ async function aggiornaPassword(formPassword) {
     }
 }
 
-//funzioni per gestire i modali di logout e passwordChange
+// Funzioni per gestire i modali di logout e passwordChange
 function openModal(id) {
     const modal = document.getElementById(id);
     if (modal) {
@@ -236,6 +290,21 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // Gestione selezione tema interfaccia (CORRETTA)
+    const selectForm = document.getElementById("theme-selector");
+    if (selectForm) {
+        selectForm.addEventListener("click", async (e) => {
+            const btn = e.target.closest(".theme-dot");
+            if (btn) {
+                // Legge l'ID dal dataset o rimuovendo il prefisso dall'ID del DOM
+                const idTemaSelezionato = btn.dataset.id || btn.id.replace("theme-", "");
+                if (idTemaSelezionato && idTemaSelezionato !== "undefined") {
+                    await aggiornaTema(idTemaSelezionato);
+                }
+            }
+        });
+    }
+
     // Gestione form budget
     const formBudget = document.getElementById("budget-form");
     if (formBudget) {
@@ -246,5 +315,28 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 
+// Funzione per aggiornare il tema (CORRETTA)
+async function aggiornaTema(temaId) {
+    const formData = new FormData();
+    formData.append("id", temaId);      // Usa 'id' come richiesto dal tuo PHP
+
+    try {
+        const response = await fetch("backend/api/aggiorna_tema_utente.php", {
+            method: "POST",
+            body: formData
+        });
+        const result = await response.json();
+
+        if (result.status === "success") {
+            // Attende che la dashboard si ricarichi dopo l'UPDATE
+            await caricaDashboard();
+            caricaTema();
+        } else {
+            showModalError(result.message || "Errore durante il cambio del tema.");
+        }
+    } catch (error) {
+        showModalError("Errore durante l'invio dei dati: " + error);
+    }
+}
 
 caricaDashboard();

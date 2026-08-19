@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once 'backend/config.php';
 require('backend/conn.php');
 require('backend/classes/utente.php');
 
@@ -36,6 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt = $conn->prepare($query);
                 $stmt->bind_param("ssss", $email, $nome, $cognome, $password);
                 if ($stmt->execute()) {
+                    session_regenerate_id(true);
                     $_SESSION['isLogged'] = true;
                     $_SESSION['email'] = $utente->getEmail();
                     header("Location: index.php");

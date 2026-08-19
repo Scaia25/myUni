@@ -3,7 +3,6 @@
   --card-bg: #ffffff;
   --dark: #131416;
   --lime: #d8fa3c;
-  --lime-hover: #cbef28;
   --text: #131416;
   --muted: #737780;
   --border: #e2e5dc;
@@ -184,7 +183,7 @@ body {
 }
 
 .sidebar-btn button {
-  background: var(--lime);
+  background: var(--user-theme);
   color: var(--dark);
   padding: 8px 12px;
   border-radius: var(--pill);
@@ -201,7 +200,7 @@ body {
 }
 
 .kpi-lime {
-  background: var(--lime);
+  background: var(--user-theme);
 }
 
 .kpi-title {
@@ -233,7 +232,7 @@ body {
 }
 
 .badge-lime {
-  background: var(--lime);
+  background: var(--user-theme);
   color: var(--dark);
 }
 
@@ -421,7 +420,7 @@ body {
 
 .bar-lime {
   width: 100%;
-  background: var(--lime);
+  background: var(--user-theme);
   border-radius: var(--pill);
 }
 
@@ -458,17 +457,13 @@ select:focus {
 
 .btn-submit {
   margin-top: 8px;
-  background: var(--lime);
+  background: var(--user-theme);
   color: var(--dark);
   border: none;
   padding: 12px;
   border-radius: var(--pill);
   font-weight: 700;
   cursor: pointer;
-}
-
-.btn-submit:hover {
-  background: var(--lime-hover);
 }
 
 .form-msg {

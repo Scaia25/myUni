@@ -12,7 +12,7 @@ if (!isset($_SESSION['isLogged']) || !$_SESSION['isLogged']) {
 }
 
 try {
-    $query = "SELECT * FROM categorie";
+    $query = "SELECT * FROM temi";
     $stmt = $conn->prepare($query);
 
     if (!$stmt->execute()) {
@@ -20,11 +20,11 @@ try {
     }
     $result = $stmt->get_result();
 
-    $categorie = $result->fetch_all(MYSQLI_ASSOC);
+    $temi = $result->fetch_all(MYSQLI_ASSOC);
 
     echo json_encode([
         'status' => 'success',
-        'data' => $categorie
+        'data' => $temi
     ]);
 
 } catch (Exception $e) {

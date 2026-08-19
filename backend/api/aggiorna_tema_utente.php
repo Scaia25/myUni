@@ -1,7 +1,7 @@
 <?php
 require_once '../config.php';
 header("Content-Type: application/json");
-require_once('../conn.php');
+require_once("../conn.php");
 
 if (!isset($_SESSION['isLogged']) || !$_SESSION['isLogged']) {
     echo json_encode([
@@ -11,22 +11,27 @@ if (!isset($_SESSION['isLogged']) || !$_SESSION['isLogged']) {
     exit();
 }
 
+$email = $_SESSION['email'];
+
 try {
-    $query = "SELECT * FROM categorie";
+    if (!isset($_POST['id']) && empty($_POST['id'])) {
+        throw new Exception("Errore nel passaggio dati");
+    }
+
+    $idTema = $_POST['id'];
+
+    $query = "UPDATE utenti SET id_tema = ?";
     $stmt = $conn->prepare($query);
+    $stmt->bind_param("i", $idTema);
 
     if (!$stmt->execute()) {
-        throw new Exception("Errore connessione/scaricamento dati db");
+        throw new Exception("Errore di connessione al server!");
     }
-    $result = $stmt->get_result();
-
-    $categorie = $result->fetch_all(MYSQLI_ASSOC);
 
     echo json_encode([
         'status' => 'success',
-        'data' => $categorie
+        'message' => 'Anagrafica aggiornata con successo!'
     ]);
-
 } catch (Exception $e) {
     echo json_encode([
         'status' => 'error',

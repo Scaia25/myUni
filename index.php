@@ -1,6 +1,5 @@
 <?php
-session_start();
-session_regenerate_id(true);
+require_once 'backend/config.php';
 require('backend/conn.php');
 require('backend/classes/utente.php');
 require('backend/classes/spesa.php');

@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once '../config.php';
 header("Content-Type: application/json");
 require_once('../conn.php');
 
@@ -13,7 +13,7 @@ if (!isset($_SESSION['isLogged']) || !$_SESSION['isLogged']) {
 
 $email = $_SESSION['email'];
 
-$query = "SELECT * FROM utenti WHERE email = ?";
+$query = "SELECT u.* FROM utenti u INNER JOIN temi t on t.ID = u.id_tema WHERE email = ?";
 $stmt = $conn->prepare($query);
 $stmt->bind_param("s", $email);
 $stmt->execute();
