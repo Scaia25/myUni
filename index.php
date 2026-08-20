@@ -8,6 +8,42 @@ if (!isset($_SESSION['isLogged']) || !$_SESSION['isLogged']) {
     header("Location: login.php");
     exit();
 }
+
+$email = $_SESSION['email'];
+
+$query = "SELECT SUM(s.importo) as spesaTotale 
+          FROM spese s 
+          WHERE s.email_utente = ? AND s.data < DATE_FORMAT(CURRENT_DATE(), '%Y-%m-01')";
+
+$stmt = $conn->prepare($query);
+$stmt->bind_param("s", $email);
+if (!$stmt->execute()) {
+    echo "<script>showModalError('Errore di connessione al server');</script>";
+    $stmt->close();
+    exit();
+}
+$res = $stmt->get_result()->fetch_assoc();
+$spesaTotalePrecedente = (float) ($res['spesaTotale'] ?? 0);
+$stmt->close();
+
+$query = "SELECT u.budget_mensile * PERIOD_DIFF(DATE_FORMAT(CURRENT_DATE(), '%Y%m'), DATE_FORMAT(u.data_iscrizione, '%Y%m')) AS budgetTotale 
+          FROM utenti u 
+          WHERE u.email = ?";
+
+$stmt = $conn->prepare($query);
+$stmt->bind_param("s", $email);
+if (!$stmt->execute()) {
+    echo "<script>showModalError('Errore di connessione al server');</script>";
+    $stmt->close();
+    exit();
+}
+$res = $stmt->get_result()->fetch_assoc();
+$budgetTotalePrecedente = (float) ($res['budgetTotale'] ?? 0);
+$stmt->close();
+
+$differenza = $budgetTotalePrecedente - $spesaTotalePrecedente;
+
+$budgetRimaneteMesiPrecedenti = number_format($differenza, 2, ',', '.');
 ?>
 
 <!DOCTYPE html>
@@ -31,7 +67,7 @@ if (!isset($_SESSION['isLogged']) || !$_SESSION['isLogged']) {
 
         <!-- SIDEBAR -->
         <aside class="sidebar">
-           <nav class="nav">
+            <nav class="nav">
                 <a class="nav-link active" title="Dashboard">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
@@ -157,7 +193,7 @@ if (!isset($_SESSION['isLogged']) || !$_SESSION['isLogged']) {
                         <span class="kpi-title">Avanzati dai mesi precedenti</span>
                     </div>
                     <div class="kpi-values">
-                        <span class="amount">0,00 €</span>
+                        <span class="amount"><?php echo $budgetRimaneteMesiPrecedenti . " €"; ?></span>
                     </div>
                 </div>
             </div>
